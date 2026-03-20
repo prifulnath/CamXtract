@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📱</text></svg>">
+    <title>Stream Sender</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: black;
+            overflow: hidden;
+            /* Prevent scrolling entirely */
+            font-family: -apple-system, sans-serif;
+        }
+
+        #video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            /* Ensures the whole camera feed is shown */
+            z-index: 1;
+        }
+
+        /* Float the flip button elegantly on top of the camera */
+        #flip-btn {
+            position: absolute;
+            bottom: 40px;
+            right: 20px;
+            z-index: 10;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            /* iOS specific blur */
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+            transition: all 0.2s ease-in-out;
+        }
+
+        #flip-btn:active {
+            background-color: rgba(255, 255, 255, 0.3);
+            transform: scale(0.95);
+        }
+
+        /* A subtle live indicator */
+        .live-badge {
+            position: absolute;
+            top: 30px;
+            left: 20px;
+            z-index: 10;
+            color: white;
+            background-color: rgba(255, 50, 50, 0.8);
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="status-overlay"
+        style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; z-index:20; background:rgba(0,0,0,0.9); color:white; justify-content:center; align-items:center; text-align:center; padding:20px; font-size:24px; box-sizing: border-box;">
+    </div>
+    <div class="live-badge">🔴 Live</div>
+    <video id="video" autoplay playsinline muted></video>
+
+    <button id="flip-btn">🔄 Flip</button>
+
+    <script src="/static/sender.js?v=9"></script>
+</body>
+
+</html>
