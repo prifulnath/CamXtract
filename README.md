@@ -356,7 +356,7 @@ pyinstaller --name "MCX_Cam_Server" --onefile --console `
 ```
 
 ```powershell
-.venv\Scripts\pyinstaller --name "MCX_Cam" --onefile --windowed `
+.venv\Scripts\pyinstaller --name "MCX_Cam" --icon "app\mcx_logo.ico" --onefile --windowed `
   --add-data "app;app" `
   --hidden-import "uvicorn.logging" `
   --hidden-import "uvicorn.loops" `
@@ -372,11 +372,11 @@ pyinstaller --name "MCX_Cam_Server" --onefile --console `
   --hidden-import "fastapi" `
   --hidden-import "starlette" `
   --hidden-import "customtkinter" `
+  --hidden-import "PIL" `
   gui.py
 ```
 
-The output will be at: **`dist\MCX_Cam_Server.exe`** (~19 MB)
-
+The output will be at: **`dist\MCX_Cam.exe`** (~22 MB)
 ---
 
 ## 🖥️ How to Use `MCX_Cam_Server.exe`

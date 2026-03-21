@@ -17,7 +17,7 @@ class VaultFrame(ctk.CTkFrame):
         header.grid_columnconfigure(0, weight=1)
         titles = ctk.CTkFrame(header, fg_color="transparent")
         titles.grid(row=0, column=0, sticky="w", padx=20, pady=20)
-        ctk.CTkLabel(titles, text="\uE72E  System Vault", font=("Segoe UI", 22, "bold"), text_color=TEXT).pack(anchor="w")
+        ctk.CTkLabel(titles, text="System Vault", font=("Segoe UI", 22, "bold"), text_color=TEXT).pack(anchor="w")
         ctk.CTkLabel(titles, text="Encrypted storage for core camera credentials, network tokens, and SSL certificates.", font=("Segoe UI", 11), text_color=TEXT_DIM).pack(anchor="w")
 
         content = ctk.CTkFrame(self, fg_color="transparent")
