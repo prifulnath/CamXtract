@@ -35,7 +35,12 @@ class ConsoleFrame(ctk.CTkFrame):
         self.app_ref = app_ref
         
         self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(5, weight=1)   # log console expands
+        self.grid_rowconfigure(0, weight=0)  # header
+        self.grid_rowconfigure(1, weight=0)  # URL cards
+        self.grid_rowconfigure(2, weight=0)  # SSL alert
+        self.grid_rowconfigure(3, weight=0)  # stats bar
+        self.grid_rowconfigure(4, weight=0)  # log header
+        self.grid_rowconfigure(5, weight=1)  # log console — expands
 
         self.log_queue = queue.Queue()
         self._server_running = False
@@ -44,7 +49,7 @@ class ConsoleFrame(ctk.CTkFrame):
 
         # ── Header ────────────────────────────────────────────────────────────
         header = ctk.CTkFrame(self, fg_color=BG_CARD, corner_radius=8, border_width=1, border_color=GRAY)
-        header.grid(row=0, column=0, padx=28, pady=(24, 0), sticky="ew")
+        header.grid(row=0, column=0, padx=28, pady=(18, 0), sticky="ew")
         header.grid_columnconfigure(0, weight=1)
 
         titles = ctk.CTkFrame(header, fg_color="transparent")
@@ -71,7 +76,7 @@ class ConsoleFrame(ctk.CTkFrame):
 
         # ── URL Cards ─────────────────────────────────────────────────────────
         cards = ctk.CTkFrame(self, fg_color="transparent")
-        cards.grid(row=1, column=0, padx=28, pady=20, sticky="ew")
+        cards.grid(row=1, column=0, padx=28, pady=12, sticky="ew")
         cards.grid_columnconfigure((0, 1), weight=1)
 
         self.url_cards_data = []
@@ -83,24 +88,24 @@ class ConsoleFrame(ctk.CTkFrame):
 
         # ── SSL Alert Box ─────────────────────────────────────────────────────
         alert_box = ctk.CTkFrame(self, fg_color=BG_ALERT, corner_radius=10, border_width=1, border_color=GRAY)
-        alert_box.grid(row=2, column=0, padx=28, pady=(0, 16), sticky="ew")
+        alert_box.grid(row=2, column=0, padx=28, pady=(0, 10), sticky="ew")
         alert_box.grid_columnconfigure(1, weight=1)
 
-        icon_box = ctk.CTkFrame(alert_box, fg_color=BLUE_BG, width=48, height=48, corner_radius=4, border_width=1, border_color=BLUE)
-        icon_box.grid(row=0, column=0, padx=28, pady=28, rowspan=2)
+        icon_box = ctk.CTkFrame(alert_box, fg_color=BLUE_BG, width=44, height=44, corner_radius=4, border_width=1, border_color=BLUE)
+        icon_box.grid(row=0, column=0, padx=20, pady=18, rowspan=2)
         icon_box.pack_propagate(False)
-        ctk.CTkLabel(icon_box, text="\uEA18", font=("Segoe MDL2 Assets", 20), text_color=BLUE).place(relx=0.5, rely=0.5, anchor="center")
+        ctk.CTkLabel(icon_box, text="\uEA18", font=("Segoe MDL2 Assets", 18), text_color=BLUE).place(relx=0.5, rely=0.5, anchor="center")
         
-        ctk.CTkLabel(alert_box, text="SSL Security Exception Required", font=("Segoe UI", 16, "bold"), text_color=TEXT).grid(row=0, column=1, sticky="w", pady=(22, 0))
+        ctk.CTkLabel(alert_box, text="SSL Security Exception Required", font=("Segoe UI", 14, "bold"), text_color=TEXT).grid(row=0, column=1, sticky="w", pady=(16, 0))
         desc_frame = ctk.CTkFrame(alert_box, fg_color="transparent")
-        desc_frame.grid(row=1, column=1, sticky="w", pady=(2, 22))
-        ctk.CTkLabel(desc_frame, text="On first visit, click ", font=("Segoe UI", 12), text_color="#666666").pack(side="left")
-        ctk.CTkLabel(desc_frame, text="Advanced → Proceed", font=("Segoe UI", 12, "bold"), text_color="#aaaaaa").pack(side="left")
-        ctk.CTkLabel(desc_frame, text=" to bypass the self-signed cert warning.", font=("Segoe UI", 12), text_color="#666666").pack(side="left")
+        desc_frame.grid(row=1, column=1, sticky="w", pady=(2, 16))
+        ctk.CTkLabel(desc_frame, text="On first visit, click ", font=("Segoe UI", 11), text_color="#666666").pack(side="left")
+        ctk.CTkLabel(desc_frame, text="Advanced → Proceed", font=("Segoe UI", 11, "bold"), text_color="#aaaaaa").pack(side="left")
+        ctk.CTkLabel(desc_frame, text=" to bypass the self-signed cert warning.", font=("Segoe UI", 11), text_color="#666666").pack(side="left")
 
         # ── Stats Bar ─────────────────────────────────────────────────────────
         stats = ctk.CTkFrame(self, fg_color="transparent")
-        stats.grid(row=3, column=0, padx=28, pady=(0, 16), sticky="ew")
+        stats.grid(row=3, column=0, padx=28, pady=(0, 8), sticky="ew")
         stats.grid_columnconfigure((0, 1, 2), weight=1)
 
         self.stat_latency   = self._stat_block(stats, col=0, label="LATENCY",      value="—")
@@ -125,7 +130,7 @@ class ConsoleFrame(ctk.CTkFrame):
 
         # ── Log Console ───────────────────────────────────────────────────────
         self.log_wrap = ctk.CTkFrame(self, fg_color=BG_INPUT, corner_radius=0, border_width=1, border_color=GRAY_DARK)
-        self.log_wrap.grid(row=5, column=0, padx=28, pady=(0, 24), sticky="nsew")
+        self.log_wrap.grid(row=5, column=0, padx=28, pady=(0, 18), sticky="nsew")
         self.log_wrap.grid_columnconfigure(0, weight=1)
         self.log_wrap.grid_rowconfigure(0, weight=1)
 
@@ -362,7 +367,6 @@ class ConsoleFrame(ctk.CTkFrame):
         finally:
             loop.close()
             self._server_running = False
-            self.after(0, self._on_server_stopped)
 
     def _on_server_started(self):
         self.log("INFO", f"Binding to HTTPS port {self._server_port}...")
@@ -383,13 +387,32 @@ class ConsoleFrame(ctk.CTkFrame):
         if not self._server_running or not hasattr(self, "_uvicorn_server"):
             return
         self.log("WARN", "Shutting down server...")
+        self.stop_btn.configure(state="disabled", text=" \uE15B  STOPPING...")
         self._uvicorn_server.should_exit = True
+        self._uvicorn_server.force_exit = True   # skip graceful drain timeout
+        self.after(400, self._wait_for_stop)
+
+    def _port_open(self, port):
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.settimeout(0.3)
+                return s.connect_ex(("127.0.0.1", port)) == 0
+        except Exception:
+            return False
+
+    def _wait_for_stop(self):
+        """Poll from main thread. Resolves as soon as the port is no longer listening."""
+        if self._server_running and self._port_open(self._server_port):
+            self.after(250, self._wait_for_stop)
+        else:
+            self._server_running = False   # ensure flag is cleared
+            self._on_server_stopped()
 
     def _on_server_stopped(self):
-        self.log("INFO", "Server stopped.")
+        self.log("INFO", "Server stopped successfully.")
         self.live_dot.configure(text_color=TEXT_DIM)
         self.start_btn.configure(state="normal")
-        self.stop_btn.configure(state="disabled")
-        self.stat_latency.configure(text="—")
-        self.stat_bandwidth.configure(text="—")
+        self.stop_btn.configure(state="disabled", text=" \uE15B  STOP SERVER")
+        self.stat_latency.configure(text="\u2014")
+        self.stat_bandwidth.configure(text="\u2014")
         self.stat_peers.configure(text="00", text_color=TEXT)

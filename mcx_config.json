@@ -1,0 +1,13 @@
+{
+    "SERVER NAME": "MCX-01",
+    "PORT ALLOCATION": "8000",
+    "PROTOCOL": "Secure WebSocket (WSS)",
+    "Auto-start Engine": 1,
+    "Hardware Acceleration": 1,
+    "Adaptive Bitrate": 0,
+    "PRIMARY INPUT DEVICE": "UltraHD Wide-Angle Core (USB-C)",
+    "RESOLUTION": "3840 x 2160",
+    "FPS": "24",
+    "INACTIVITY TIMEOUT": "5 Minutes",
+    "Auto-Reconnect": 1
+}

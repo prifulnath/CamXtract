@@ -60,21 +60,16 @@ class MenuFrame(ctk.CTkFrame):
             
             self.app_ref.nav_buttons[label] = {"frame": row_frame, "label": lbl, "indicator": indicator}
 
-        # Spacer
-        ctk.CTkLabel(self, text="", fg_color="transparent").grid(row=6, column=0, sticky="ew")
+        # Spacer fills remaining space
+        ctk.CTkLabel(self, text="", fg_color="transparent").grid(row=6, column=0, sticky="nsew")
+        self.grid_rowconfigure(6, weight=1)
 
-        # Deploy button
-        deploy_btn = ctk.CTkButton(
-            self, text="\uE945  DEPLOY NODE",
-            font=("Segoe UI", 12, "bold"),
-            fg_color=GREEN, text_color=GREEN_TEXT,
-            hover_color=GREEN_DIM, corner_radius=2, height=44,
-            command=self.app_ref._update_server_name
-        )
-        deploy_btn.grid(row=7, column=0, padx=16, pady=(0, 16), sticky="ew")
-        
-        # Save deploy btn ref for mapping in gui.py
-        self.deploy_btn = deploy_btn
+        # Keep a hidden dummy so gui.py's deploy_btn.configure() doesn't crash
+        self.deploy_btn = ctk.CTkButton(self, text="", fg_color="transparent", height=0)
+
+        # Horizontal separator above bottom nav
+        sep = ctk.CTkFrame(self, fg_color="#262626", height=1, corner_radius=0)
+        sep.grid(row=7, column=0, sticky="ew", padx=12, pady=(0, 4))
 
         # Bottom nav
         for i, (icon, label) in enumerate([("\uE72E", "Vault"), ("\uE897", "Support")]):
@@ -91,3 +86,11 @@ class MenuFrame(ctk.CTkFrame):
             lbl.bind("<Button-1>", lambda e, n=label: self.app_ref.show_frame(n))
             
             self.app_ref.nav_buttons[label] = {"frame": row_frame, "label": lbl, "indicator": indicator}
+
+    def set_active(self, name):
+        """Programmatically highlight a sidebar nav item."""
+        for label, widgets in self.app_ref.nav_buttons.items():
+            is_active = label == name
+            widgets["frame"].configure(fg_color=GREEN_SIDE if is_active else "transparent")
+            widgets["label"].configure(text_color=GREEN if is_active else TEXT_DIM)
+            widgets["indicator"].configure(fg_color=GREEN if is_active else "transparent")

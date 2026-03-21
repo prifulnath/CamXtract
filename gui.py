@@ -76,6 +76,10 @@ class MCXCamApp(ctk.CTk):
         except Exception:
             pass
 
+        # Re-apply root grid weights after deiconify so main_container fills space
+        self.grid_columnconfigure(1, weight=1)
+        self.grid_rowconfigure(1, weight=1)
+
         self.main_container = ctk.CTkFrame(self, fg_color=BG_PANEL, corner_radius=0)
         self.main_container.grid(row=1, column=1, sticky="nsew")
         self.main_container.grid_columnconfigure(0, weight=1)
@@ -94,18 +98,33 @@ class MCXCamApp(ctk.CTk):
 
         self.sidebar = MenuFrame(self, self)
         
-        self.frames["Console"] = ConsoleFrame(self.main_container, self)
-        self.frames["Server Settings"] = ServerSettingsFrame(self.main_container, self)
-        self.frames["Network Info"] = NetworkInfoFrame(self.main_container, self)
-        self.frames["Security Log"] = SecurityLogFrame(self.main_container, self)
-        self.frames["Vault"] = VaultFrame(self.main_container, self)
-        self.frames["Support"] = SupportFrame(self.main_container, self)
+        frame_classes = [
+            ("Console",         ConsoleFrame),
+            ("Server Settings", ServerSettingsFrame),
+            ("Network Info",    NetworkInfoFrame),
+            ("Security Log",    SecurityLogFrame),
+            ("Vault",           VaultFrame),
+            ("Support",         SupportFrame),
+        ]
+        for name, cls in frame_classes:
+            try:
+                self.frames[name] = cls(self.main_container, self)
+            except Exception as e:
+                import traceback
+                # Create an error placeholder frame instead of crashing
+                err_frame = ctk.CTkFrame(self.main_container, fg_color="#0e0e0e", corner_radius=0)
+                ctk.CTkLabel(err_frame, text=f"Error loading {name}:\n{e}", font=("Courier New", 11),
+                             text_color="#ff716c", wraplength=600, justify="left").pack(padx=30, pady=30, anchor="nw")
+                self.frames[name] = err_frame
 
         for name, frame in self.frames.items():
             frame.grid(row=0, column=0, sticky="nsew")
         
         # Wire up the Deploy Configuration button inside Server Settings panel
-        self.frames["Server Settings"].deploy_btn.configure(command=self._update_server_name)
+        try:
+            self.frames["Server Settings"].deploy_btn.configure(command=self._update_server_name)
+        except Exception:
+            pass
             
         self._update_server_name(initial=True)
         self.show_frame("Console")
@@ -113,6 +132,18 @@ class MCXCamApp(ctk.CTk):
         self.frames["Console"].log("INFO", "MCX Cam Control Node initialized.")
         self.frames["Console"].log("INFO", f"Local IP detected: {self.ip}")
         self.frames["Console"].log("INFO", "Click 'START SERVER' to launch the streaming service.")
+
+        # Auto-start server if configured
+        auto_start = self.frames["Server Settings"].ui_elements.get("Auto-start Engine")
+        if auto_start and str(auto_start.get()) in ("1", "True", "true"):
+            self.frames["Console"].log("INFO", "Auto-start enabled. Launching server...")
+            self.after(500, self.frames["Console"].start_server)
+
+    @property
+    def _server_running(self):
+        """Proxy so SupportFrame can read server state without circular imports."""
+        console = self.frames.get("Console")
+        return console._server_running if console else False
 
     def _update_server_name(self, event=None, initial=False):
         self.frames["Server Settings"].save_config()
@@ -176,9 +207,19 @@ class MCXCamApp(ctk.CTk):
         def close():
             self.on_closing()
 
-        ctk.CTkButton(controls, text="\uE921", font=("Segoe MDL2 Assets", 11), width=32, height=32, fg_color="transparent", text_color=TEXT_DIM, hover_color=GRAY_DARK, command=minimize).pack(side="left", padx=4)
-        ctk.CTkButton(controls, text="\uE922", font=("Segoe MDL2 Assets", 10), width=32, height=32, fg_color="transparent", text_color=TEXT_DIM, hover_color=GRAY_DARK, command=maximize).pack(side="left", padx=4)
-        ctk.CTkButton(controls, text="\uE8BB", font=("Segoe MDL2 Assets", 11), width=32, height=32, fg_color="transparent", text_color=TEXT_DIM, hover_color="#c42b1c", command=close).pack(side="left", padx=4)
+        btn_style = dict(
+            font=("Segoe MDL2 Assets", 10),
+            width=46, height=48,
+            fg_color="transparent",
+            text_color="#cccccc",
+            corner_radius=0,
+        )
+        ctk.CTkButton(controls, text="\uE921", hover_color="#2a2a2a",
+                      command=minimize, **btn_style).pack(side="left")
+        ctk.CTkButton(controls, text="\uE922", hover_color="#2a2a2a",
+                      command=maximize, **btn_style).pack(side="left")
+        ctk.CTkButton(controls, text="\uE8BB", hover_color="#c42b1c",
+                      command=close, **btn_style).pack(side="left")
 
         def start_move(event):
             self.x = event.x
