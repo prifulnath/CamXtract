@@ -15,3 +15,8 @@ venv.bak/
 # Personal / Local SSL Certs
 key.pem
 cert.pem
+
+# PyInstaller Build Artifacts
+build/
+dist/
+*.spec

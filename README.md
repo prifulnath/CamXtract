@@ -320,6 +320,131 @@ If your server IP was `192.168.220.37` (replace with your actual local IP):
 
 ---
 
+## 📦 Building a Standalone `.exe` (Windows)
+
+You can package the entire MCX Cam App into a **single portable `.exe` file** using PyInstaller. No Python installation is required on the target machine.
+
+### 1. Install PyInstaller
+
+Make sure your virtual environment is active, then run:
+
+```powershell
+pip install pyinstaller
+```
+
+### 2. Build the Executable
+
+From the project root, run:
+
+```powershell
+pyinstaller --name "MCX_Cam_Server" --onefile --console `
+  --add-data "app;app" `
+  --hidden-import "uvicorn.logging" `
+  --hidden-import "uvicorn.loops" `
+  --hidden-import "uvicorn.loops.auto" `
+  --hidden-import "uvicorn.protocols" `
+  --hidden-import "uvicorn.protocols.http" `
+  --hidden-import "uvicorn.protocols.http.auto" `
+  --hidden-import "uvicorn.protocols.websockets" `
+  --hidden-import "uvicorn.protocols.websockets.auto" `
+  --hidden-import "uvicorn.lifespan" `
+  --hidden-import "uvicorn.lifespan.on" `
+  --hidden-import "cryptography" `
+  --hidden-import "fastapi" `
+  --hidden-import "starlette" `
+  run.py
+```
+
+```powershell
+.venv\Scripts\pyinstaller --name "MCX_Cam" --onefile --windowed `
+  --add-data "app;app" `
+  --hidden-import "uvicorn.logging" `
+  --hidden-import "uvicorn.loops" `
+  --hidden-import "uvicorn.loops.auto" `
+  --hidden-import "uvicorn.protocols" `
+  --hidden-import "uvicorn.protocols.http" `
+  --hidden-import "uvicorn.protocols.http.auto" `
+  --hidden-import "uvicorn.protocols.websockets" `
+  --hidden-import "uvicorn.protocols.websockets.auto" `
+  --hidden-import "uvicorn.lifespan" `
+  --hidden-import "uvicorn.lifespan.on" `
+  --hidden-import "cryptography" `
+  --hidden-import "fastapi" `
+  --hidden-import "starlette" `
+  --hidden-import "customtkinter" `
+  gui.py
+```
+
+The output will be at: **`dist\MCX_Cam_Server.exe`** (~19 MB)
+
+---
+
+## 🖥️ How to Use `MCX_Cam_Server.exe`
+
+### Step 1 — Copy the `.exe`
+
+Place `MCX_Cam_Server.exe` anywhere on your Windows machine (e.g. Desktop or any user folder).
+
+> ⚠️ **Do NOT place it inside `Program Files`** — it needs write access to that folder to generate the SSL certificate files.
+
+### Step 2 — Run It
+
+Double-click the `.exe`, or launch it from a terminal:
+
+```powershell
+.\MCX_Cam_Server.exe
+```
+
+### Step 3 — What Happens Automatically
+
+On **first launch**, the app will:
+1. 🔐 Detect that `key.pem` / `cert.pem` are missing
+2. Auto-detect your machine's **local IP address**
+3. Generate a **self-signed SSL certificate** valid for 365 days
+4. Start the HTTPS server on port `8000`
+
+On **subsequent launches**, it skips the certificate generation and starts the server immediately.
+
+### Step 4 — Open the App
+
+The console will display your exact URLs:
+
+```
+=======================================================
+  🎥  MCX Cam — Local Network Camera App
+=======================================================
+  📱 Sender (Mobile) : https://192.168.x.x:8000/sender.html
+  💻 Viewer (Desktop): https://192.168.x.x:8000/viewer.html
+
+  ⚠️  On first visit, click 'Advanced → Proceed'
+     to bypass the self-signed cert warning.
+=======================================================
+```
+
+* Open the **Sender** URL on your mobile device (must be on same WiFi)
+* Open the **Viewer** URL on your laptop or secondary device
+
+### Step 5 — Trust the Certificate (One Time Only)
+
+Since the cert is self-signed, your browser will show a security warning on the **first visit**:
+
+| Browser | Steps |
+|---|---|
+| **Chrome** | Click `Advanced` → `Proceed to <IP> (unsafe)` |
+| **Safari (iOS)** | Tap `Show Details` → `Visit this website` → `Visit website` |
+| **Firefox** | Click `Advanced...` → `Accept the Risk and Continue` |
+
+After accepting, the camera and stream will work normally. You'll only need to do this once per device per certificate.
+
+### ♻️ Regenerating the Certificate
+
+If your **computer's IP address changes** (e.g. after reconnecting to WiFi), the old certificate will no longer work for that IP. To regenerate:
+
+1. Delete `key.pem` and `cert.pem` from the same folder as the `.exe`
+2. Re-run `MCX_Cam_Server.exe` — it will auto-generate fresh certificates for the new IP
+
+---
+
 ## ✅ Summary
 
 This system:
