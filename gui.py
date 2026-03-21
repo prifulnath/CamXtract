@@ -127,11 +127,11 @@ class MCXCamApp(ctk.CTk):
         self._build_sidebar()
         self._build_main()
         
-        from ui_server_settings import ServerSettingsFrame
-        from ui_network_info import NetworkInfoFrame
-        from ui_security_log import SecurityLogFrame
-        from ui_vault import VaultFrame
-        from ui_support import SupportFrame
+        from ui.ui_server_settings import ServerSettingsFrame
+        from ui.ui_network_info import NetworkInfoFrame
+        from ui.ui_security_log import SecurityLogFrame
+        from ui.ui_vault import VaultFrame
+        from ui.ui_support import SupportFrame
 
         self.frames["Server Settings"] = ServerSettingsFrame(self.main_container, self)
         self.frames["Network Info"] = NetworkInfoFrame(self.main_container, self)
