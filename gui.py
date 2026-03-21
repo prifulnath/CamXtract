@@ -115,8 +115,49 @@ class MCXCamApp(ctk.CTk):
     def _build_ui(self):
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
+        
+        self.main_container = ctk.CTkFrame(self, fg_color=BG_PANEL, corner_radius=0)
+        self.main_container.grid(row=0, column=1, sticky="nsew")
+        self.main_container.grid_columnconfigure(0, weight=1)
+        self.main_container.grid_rowconfigure(0, weight=1)
+
+        self.frames = {}
+        self.nav_buttons = {}
+
         self._build_sidebar()
         self._build_main()
+        
+        from ui_server_settings import ServerSettingsFrame
+        from ui_network_info import NetworkInfoFrame
+        from ui_security_log import SecurityLogFrame
+        from ui_vault import VaultFrame
+        from ui_support import SupportFrame
+
+        self.frames["Server Settings"] = ServerSettingsFrame(self.main_container, self)
+        self.frames["Network Info"] = NetworkInfoFrame(self.main_container, self)
+        self.frames["Security Log"] = SecurityLogFrame(self.main_container, self)
+        self.frames["Vault"] = VaultFrame(self.main_container, self)
+        self.frames["Support"] = SupportFrame(self.main_container, self)
+
+        for name, frame in self.frames.items():
+            frame.grid(row=0, column=0, sticky="nsew")
+            
+        self.show_frame("Console")
+
+    def show_frame(self, name):
+        frame = self.frames.get(name)
+        if frame:
+            frame.tkraise()
+            
+        for nav_name, nav_dict in self.nav_buttons.items():
+            if nav_name == name:
+                nav_dict["frame"].configure(fg_color=GREEN_SIDE)
+                nav_dict["label"].configure(text_color=GREEN)
+                nav_dict["indicator"].configure(fg_color=GREEN)
+            else:
+                nav_dict["frame"].configure(fg_color="transparent")
+                nav_dict["label"].configure(text_color=TEXT_DIM)
+                nav_dict["indicator"].configure(fg_color="transparent")
 
     # ── SIDEBAR ───────────────────────────────────────────────────────────────
     def _build_sidebar(self):
@@ -159,18 +200,23 @@ class MCXCamApp(ctk.CTk):
                 corner_radius=0
             )
             row_frame.grid(row=i + 1, column=0, pady=0, sticky="ew")
+            row_frame.bind("<Button-1>", lambda e, n=label: self.show_frame(n))
             
-            if active:
-                indicator = ctk.CTkFrame(row_frame, fg_color=GREEN, width=3, height=1)
-                indicator.pack(side="left", fill="y")
+            indicator = ctk.CTkFrame(row_frame, width=3, height=0)
+            indicator.pack(side="left", fill="y")
+            indicator.configure(fg_color=GREEN if active else "transparent")
                 
             text_color = GREEN if active else TEXT_DIM
-            ctk.CTkLabel(
+            lbl = ctk.CTkLabel(
                 row_frame, text=f"  {icon}   {label}",
-                font=("Segoe UI", 12, "bold" if active else "normal"),
+                font=("Segoe UI", 12, "bold"),
                 text_color=text_color,
                 anchor="w"
-            ).pack(side="left", padx=20, pady=10)
+            )
+            lbl.pack(side="left", padx=20, pady=10)
+            lbl.bind("<Button-1>", lambda e, n=label: self.show_frame(n))
+            
+            self.nav_buttons[label] = {"frame": row_frame, "label": lbl, "indicator": indicator}
 
         # Spacer
         ctk.CTkLabel(sb, text="", fg_color="transparent").grid(row=6, column=0, sticky="ew")
@@ -186,17 +232,28 @@ class MCXCamApp(ctk.CTk):
 
         # Bottom nav
         for i, (icon, label) in enumerate([("\uE72E", "Vault"), ("\uE897", "Support")]):
-            row_frame = ctk.CTkFrame(sb, fg_color="transparent")
-            row_frame.grid(row=8 + i, column=0, padx=8, pady=0, sticky="ew")
-            ctk.CTkLabel(
-                row_frame, text=f"  {icon}   {label}",
+            row_frame = ctk.CTkFrame(sb, fg_color="transparent", corner_radius=0)
+            row_frame.grid(row=8 + i, column=0, padx=0, pady=0, sticky="ew")
+            row_frame.bind("<Button-1>", lambda e, n=label: self.show_frame(n))
+            
+            indicator = ctk.CTkFrame(row_frame, width=3, height=0)
+            indicator.pack(side="left", fill="y")
+            indicator.configure(fg_color="transparent")
+
+            lbl = ctk.CTkLabel(
+                row_frame, text=f"   {icon}   {label}",
                 font=("Segoe UI", 11, "bold"), text_color=TEXT_DIM, anchor="w"
-            ).pack(side="left", padx=16, pady=8)
+            )
+            lbl.pack(side="left", padx=16, pady=8)
+            lbl.bind("<Button-1>", lambda e, n=label: self.show_frame(n))
+            
+            self.nav_buttons[label] = {"frame": row_frame, "label": lbl, "indicator": indicator}
 
     # ── MAIN PANEL ────────────────────────────────────────────────────────────
     def _build_main(self):
-        main = ctk.CTkFrame(self, fg_color=BG_PANEL, corner_radius=0)
-        main.grid(row=0, column=1, sticky="nsew")
+        main = ctk.CTkFrame(self.main_container, fg_color=BG_PANEL, corner_radius=0)
+        self.frames["Console"] = main
+        main.grid(row=0, column=0, sticky="nsew")
         main.grid_columnconfigure(0, weight=1)
         main.grid_rowconfigure(4, weight=1)   # log console expands
 
