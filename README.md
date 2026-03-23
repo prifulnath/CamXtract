@@ -4,6 +4,7 @@
 
 [![Download](https://img.shields.io/badge/Download-v0.0.1-brightgreen?style=for-the-badge&logo=github)](https://github.com/prifulnath/MCX_Cam/releases/tag/v0.0.1)
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010%2F11-blue?style=for-the-badge&logo=windows)](https://github.com/prifulnath/MCX_Cam/releases/tag/v0.0.1)
+[![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 
 > 📥 **[Download MCX_Cam_v0.0.1.exe](https://github.com/prifulnath/MCX_Cam/releases/tag/v0.0.1)** — No installation required. Just download and run.
 
