@@ -81,8 +81,16 @@ class ServerSettingsFrame(ctk.CTkFrame):
         lbl_head = ctk.CTkFrame(slide_frame, fg_color="transparent")
         lbl_head.pack(fill="x")
         ctk.CTkLabel(lbl_head, text="CPU LIMITER", font=("Segoe UI", 10, "bold"), text_color=TEXT_DIM).pack(side="left")
-        ctk.CTkLabel(lbl_head, text="75%", font=("Segoe UI", 12, "bold"), text_color=GREEN).pack(side="right")
-        ctk.CTkSlider(slide_frame, from_=0, to=100, number_of_steps=100, button_color=GREEN, fg_color=OUTLINE_DIM, progress_color=GREEN).pack(fill="x", pady=(10, 0))
+        _cpu_lbl = ctk.CTkLabel(lbl_head, text="75%", font=("Segoe UI", 12, "bold"), text_color=GREEN)
+        _cpu_lbl.pack(side="right")
+        _cpu_slider = ctk.CTkSlider(slide_frame, from_=0, to=100, number_of_steps=100,
+                                    button_color=GREEN, fg_color=OUTLINE_DIM, progress_color=GREEN,
+                                    command=lambda v: _cpu_lbl.configure(text=f"{int(v)}%"))
+        _cpu_init = int(self.config.get("CPU LIMITER", 75))
+        _cpu_slider.set(_cpu_init)
+        _cpu_lbl.configure(text=f"{_cpu_init}%")
+        _cpu_slider.pack(fill="x", pady=(10, 0))
+        self.ui_elements["CPU LIMITER"] = _cpu_slider
 
         self._build_switch(perf, -1, -1, "Adaptive Bitrate", "Dynamic scaling based on congestion", False, use_pack=True)
 
@@ -125,8 +133,16 @@ class ServerSettingsFrame(ctk.CTkFrame):
         lbl_head2 = ctk.CTkFrame(slide_frame2, fg_color="transparent")
         lbl_head2.pack(fill="x")
         ctk.CTkLabel(lbl_head2, text="MAX VIEWERS", font=("Segoe UI", 10, "bold"), text_color=TEXT_DIM).pack(side="left")
-        ctk.CTkLabel(lbl_head2, text="12", font=("Segoe UI", 12, "bold"), text_color=GREEN).pack(side="right")
-        ctk.CTkSlider(slide_frame2, from_=1, to=50, number_of_steps=50, button_color=GREEN, fg_color=OUTLINE_DIM, progress_color=GREEN).pack(fill="x", pady=(10, 0))
+        _viewers_lbl = ctk.CTkLabel(lbl_head2, text="12", font=("Segoe UI", 12, "bold"), text_color=GREEN)
+        _viewers_lbl.pack(side="right")
+        _viewers_slider = ctk.CTkSlider(slide_frame2, from_=1, to=50, number_of_steps=49,
+                                        button_color=GREEN, fg_color=OUTLINE_DIM, progress_color=GREEN,
+                                        command=lambda v: _viewers_lbl.configure(text=str(int(v))))
+        _viewers_init = int(self.config.get("MAX VIEWERS", 12))
+        _viewers_slider.set(_viewers_init)
+        _viewers_lbl.configure(text=str(_viewers_init))
+        _viewers_slider.pack(fill="x", pady=(10, 0))
+        self.ui_elements["MAX VIEWERS"] = _viewers_slider
 
         self._build_dropdown(stream, -1, -1, "INACTIVITY TIMEOUT", ["5 Minutes", "15 Minutes", "30 Minutes", "Never"], use_pack=True)
         self._build_switch(stream, -1, -1, "Auto-Reconnect", "Retry on network drop", True, use_pack=True)
@@ -137,14 +153,14 @@ class ServerSettingsFrame(ctk.CTkFrame):
         ctk.CTkLabel(warning_frm, text="\uE946   Changes to streaming behavior require a service restart.", font=("Segoe UI", 10, "italic"), text_color=TEXT_DIM).pack(anchor="w")
 
         # ── Footer Stats Bar ──
-        footer = ctk.CTkFrame(self, fg_color="transparent", border_width=1, border_color=OUTLINE_DIM)
-        footer.grid(row=2, column=0, sticky="ew", padx=28, pady=0)
+        footer = ctk.CTkFrame(self, fg_color="#0d0d0d", border_width=1, border_color=OUTLINE_DIM)
+        footer.grid(row=2, column=0, sticky="ew", padx=28, pady=(0, 0))
         footer_inner = ctk.CTkFrame(footer, fg_color="transparent")
-        footer_inner.pack(fill="x", padx=20, pady=16)
-        
-        self._footer_stat(footer_inner, "\uE734", "System Status: ", "Nominal")
-        self._footer_stat(footer_inner, "\uE950", "Memory Load: ", "14%")
-        self._footer_stat(footer_inner, "\uE88A", "Uplink: ", "Active (124ms)")
+        footer_inner.pack(fill="x", padx=20, pady=10)
+
+        self._footer_stat(footer_inner, "\u25CF", GREEN,     "SYSTEM STATUS", "NOMINAL")
+        self._footer_stat(footer_inner, "\u25CF", GREEN,     "MEMORY LOAD",   "14%")
+        self._footer_stat(footer_inner, "\u2B06", "#4a86e8", "UPLINK",        "ACTIVE [124ms]")
 
     def _build_input(self, parent, row, col, label, val):
         f = ctk.CTkFrame(parent, fg_color="transparent")
@@ -207,14 +223,12 @@ class ServerSettingsFrame(ctk.CTkFrame):
         ctk.CTkLabel(val_f, text=val, font=("Space Grotesk", 18, "bold"), text_color=TEXT).pack(side="left")
         ctk.CTkLabel(val_f, text=" "+unit, font=("Segoe UI", 11), text_color=TEXT_DIM).pack(side="left", pady=(4, 0))
 
-    def _footer_stat(self, parent, icon, lbl, val):
+    def _footer_stat(self, parent, dot, dot_col, lbl, val):
         f = ctk.CTkFrame(parent, fg_color="transparent")
-        f.pack(side="left", padx=(0, 24))
-        ctk.CTkLabel(f, text=icon, font=("Segoe MDL2 Assets", 14), text_color=TEXT_DIM).pack(side="left", padx=(0, 8))
-        if icon == "\uE734":
-            ctk.CTkLabel(f, text="\u25CF ", font=("Segoe UI", 12), text_color=GREEN).pack(side="left") 
-        ctk.CTkLabel(f, text=lbl.upper(), font=("Segoe UI", 10, "bold"), text_color=TEXT_DIM).pack(side="left")
-        ctk.CTkLabel(f, text=val, font=("Segoe UI", 10, "bold"), text_color=TEXT).pack(side="left")
+        f.pack(side="left", padx=(0, 28))
+        ctk.CTkLabel(f, text=dot + " ", font=("Segoe UI", 10), text_color=dot_col).pack(side="left")
+        ctk.CTkLabel(f, text=lbl + ": ", font=("Space Grotesk", 9, "bold"), text_color=TEXT_DIM).pack(side="left")
+        ctk.CTkLabel(f, text=val, font=("Space Grotesk", 9, "bold"), text_color=TEXT).pack(side="left")
 
     def _load_config(self):
         if os.path.exists(CONFIG_FILE):

@@ -3,7 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# Environments
+# Virtual Environments
 .env
 .venv
 env/
@@ -12,11 +12,25 @@ ENV/
 env.bak/
 venv.bak/
 
-# Personal / Local SSL Certs
+# Local SSL Certificates (machine-specific, sensitive)
 key.pem
 cert.pem
 
 # PyInstaller Build Artifacts
 build/
 dist/
-*.spec
+
+# User Config (machine-specific)
+mcx_config.json
+
+# OS / Editor Artifacts
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# Temporary / Debug Scripts
+fix_*.py
+_check_*.py

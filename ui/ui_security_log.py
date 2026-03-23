@@ -119,7 +119,7 @@ class SecurityLogFrame(ctk.CTkFrame):
             accent.pack(side="left", fill="y")
 
         inner = ctk.CTkFrame(card, fg_color="transparent")
-        inner.pack(fill="both", expand=True, padx=12, pady=12)
+        inner.pack(fill="x", expand=False, padx=10, pady=5)
 
         # Top row: icon + title
         top = ctk.CTkFrame(inner, fg_color="transparent")
@@ -128,14 +128,14 @@ class SecurityLogFrame(ctk.CTkFrame):
         ctk.CTkLabel(top, text=title, font=("Space Grotesk", 10, "bold"),
                      text_color=RED if is_crit else TEXT).pack(side="left", anchor="w")
 
-        # Detail
+        # Detail — indented to align with title (past icon)
         ctk.CTkLabel(inner, text=detail,
                      font=("Courier New", 12, "bold") if "IP:" in detail else ("Space Grotesk", 11),
-                     text_color=TEXT, anchor="w").pack(anchor="w", pady=(6, 0))
+                     text_color=TEXT, anchor="w").pack(anchor="w", padx=(26, 0), pady=(2, 0))
 
-        # Meta
+        # Meta — same indent
         ctk.CTkLabel(inner, text=meta, font=("Space Grotesk", 8, "bold"),
-                     text_color=TEXT_DIM, anchor="w").pack(anchor="w", pady=(4, 0))
+                     text_color=TEXT_DIM, anchor="w").pack(anchor="w", padx=(26, 0), pady=(2, 0))
 
     def _ssl_card(self, parent):
         card = ctk.CTkFrame(parent, fg_color=BG_GLASS, corner_radius=8,

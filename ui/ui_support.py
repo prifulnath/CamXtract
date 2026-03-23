@@ -22,6 +22,7 @@ class SupportFrame(ctk.CTkFrame):
         self.app_ref = app_ref
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(1, weight=1)
+        self.grid_rowconfigure(2, weight=0)
 
         # Header Section
         header = ctk.CTkFrame(self, fg_color="transparent")
@@ -29,11 +30,11 @@ class SupportFrame(ctk.CTkFrame):
         header.grid_columnconfigure(0, weight=1)
         
         ctk.CTkLabel(header, text="System Support", font=("Space Grotesk", 36, "bold"), text_color=TEXT).pack(anchor="w", pady=(0, 4))
-        ctk.CTkLabel(header, text="Diagnostics and technical assistance console for MCX-CORE visual intelligence infrastructure.", font=("Space Grotesk", 14), text_color=TEXT_DIM).pack(anchor="w")
+        ctk.CTkLabel(header, text="Diagnostics and technical assistance console for MCX-CAM visual intelligence infrastructure.", font=("Space Grotesk", 14), text_color=TEXT_DIM).pack(anchor="w")
 
         # Bento Grid Configuration
         content = ctk.CTkFrame(self, fg_color="transparent")
-        content.grid(row=1, column=0, padx=28, pady=24, sticky="nsew")
+        content.grid(row=1, column=0, padx=28, pady=(12, 16), sticky="nsew")
         content.grid_columnconfigure(0, weight=2)
         content.grid_columnconfigure(1, weight=1)
         content.grid_rowconfigure(0, weight=1)
@@ -44,10 +45,10 @@ class SupportFrame(ctk.CTkFrame):
         
         # Troubleshooting Tools
         tools_card = ctk.CTkFrame(left, fg_color=BG_CARD, corner_radius=8)
-        tools_card.pack(fill="x", pady=(0, 24))
+        tools_card.pack(fill="x", pady=(0, 12))
         
         tools_header = ctk.CTkFrame(tools_card, fg_color="transparent")
-        tools_header.pack(fill="x", padx=24, pady=(24, 16))
+        tools_header.pack(fill="x", padx=20, pady=(16, 10))
         ctk.CTkLabel(tools_header, text="TROUBLESHOOTING TOOLS", font=("Space Grotesk", 11, "bold"), text_color=GREEN).pack(side="left")
         
         ready_badge = ctk.CTkFrame(tools_header, fg_color=BG_HIGHEST, corner_radius=4)
@@ -55,7 +56,7 @@ class SupportFrame(ctk.CTkFrame):
         ctk.CTkLabel(ready_badge, text="READY", font=("Courier New", 10, "bold"), text_color=TEXT_DIM).pack(padx=6, pady=2)
         
         tools_grid = ctk.CTkFrame(tools_card, fg_color="transparent")
-        tools_grid.pack(fill="x", padx=24, pady=(0, 24))
+        tools_grid.pack(fill="x", padx=20, pady=(0, 16))
         tools_grid.grid_columnconfigure((0, 1, 2), weight=1)
         
         self._tool_btn(tools_grid, 0, "\uE89A", "TEST CAMERA",    "Open sender URL in browser",   self._test_camera)
@@ -66,7 +67,7 @@ class SupportFrame(ctk.CTkFrame):
         docs_card = ctk.CTkFrame(left, fg_color=BG_LOW, corner_radius=8)
         docs_card.pack(fill="both", expand=True)
         
-        ctk.CTkLabel(docs_card, text="TECHNICAL DOCUMENTATION", font=("Space Grotesk", 11, "bold"), text_color=TEXT_DIM).pack(anchor="w", padx=24, pady=(24, 16))
+        ctk.CTkLabel(docs_card, text="TECHNICAL DOCUMENTATION", font=("Space Grotesk", 11, "bold"), text_color=TEXT_DIM).pack(anchor="w", padx=20, pady=(16, 10))
         
         self._doc(docs_card, "\uE8A5", "MCX Deployment Guide", "Step-by-step camera provisioning and local setup.")
         self._doc(docs_card, "\uE8D7", "SSL & Security Handshake", "Resolving common certificate and HTTPS warnings.")
@@ -78,38 +79,59 @@ class SupportFrame(ctk.CTkFrame):
 
         # Debug Protocol
         debug_card = ctk.CTkFrame(right, fg_color=BG_HIGHEST, corner_radius=8)
-        debug_card.pack(fill="x", pady=(0, 24))
-        
-        ctk.CTkLabel(debug_card, text="DEBUG PROTOCOL", font=("Space Grotesk", 11, "bold"), text_color=GREEN).pack(anchor="w", padx=24, pady=(24, 16))
-        
+        debug_card.pack(fill="x", pady=(0, 12))
+
+        ctk.CTkLabel(debug_card, text="DEBUG PROTOCOL", font=("Space Grotesk", 11, "bold"), text_color=GREEN).pack(anchor="w", padx=20, pady=(16, 10))
+
         console_box = ctk.CTkFrame(debug_card, fg_color=BG_LOWEST, corner_radius=4)
-        console_box.pack(fill="x", padx=24, pady=(0, 16))
+        console_box.pack(fill="x", padx=20, pady=(0, 10))
         log_text = "[SYS_INFO]: OK\n[NET_STACK]: SECURE\n[KERN_V]: 2.4.0-S\n[LAST_ERR]: NONE"
         ctk.CTkLabel(console_box, text=log_text, font=("Courier New", 10), text_color="#2cefbc", justify="left").pack(anchor="w", padx=12, pady=12)
         
-        ctk.CTkButton(debug_card, text="\uE896  EXPORT SYSTEM LOGS", font=("Space Grotesk", 10, "bold"), fg_color=GREEN, text_color=GREEN_TEXT, hover_color=GREEN_DIM, height=40, corner_radius=4, command=self._export_logs).pack(fill="x", padx=24, pady=(0, 12))
-        ctk.CTkButton(debug_card, text="\uE81C  CORE DUMP", font=("Space Grotesk", 10, "bold"), fg_color="transparent", text_color=GREEN, hover_color=BG_LOW, border_width=1, border_color=GRAY, height=40, corner_radius=4, command=self._core_dump).pack(fill="x", padx=24, pady=(0, 24))
+        ctk.CTkButton(debug_card, text="\uE896  EXPORT SYSTEM LOGS", font=("Space Grotesk", 10, "bold"), fg_color=GREEN, text_color=GREEN_TEXT, hover_color=GREEN_DIM, height=36, corner_radius=4, command=self._export_logs).pack(fill="x", padx=20, pady=(0, 8))
+        ctk.CTkButton(debug_card, text="\uE81C  CORE DUMP", font=("Space Grotesk", 10, "bold"), fg_color="transparent", text_color=GREEN, hover_color=BG_LOW, border_width=1, border_color=GRAY, height=36, corner_radius=4, command=self._core_dump).pack(fill="x", padx=20, pady=(0, 16))
 
         # Support Channels
         channels_card = ctk.CTkFrame(right, fg_color=BG_CARD, corner_radius=8)
         channels_card.pack(fill="both", expand=True)
 
-        ctk.CTkLabel(channels_card, text="SUPPORT CHANNELS", font=("Space Grotesk", 11, "bold"), text_color=TEXT_DIM).pack(anchor="w", padx=24, pady=(24, 16))
+        ctk.CTkLabel(channels_card, text="SUPPORT CHANNELS", font=("Space Grotesk", 11, "bold"), text_color=TEXT_DIM).pack(anchor="w", padx=20, pady=(16, 10))
         
-        self._channel(channels_card, "\uE715", "Email Support", "Response in 24h", "mailto:support@mcxcam.local")
-        self._channel(channels_card, "\uE8EF", "GitHub Issues", "Community tracker", "https://github.com/mcx/issues")
-        self._channel(channels_card, "\uE9CE", "Public FAQ", "Searchable database", "https://mcxcam.com/faq")
+        self._channel(channels_card, "\uE715", "Email Support", "Response in 24h", "mailto:prifulnath@gmail.com")
+        self._channel(channels_card, "\uE8EF", "GitHub Issues", "Community tracker", "https://github.com/prifulnath/MCX_Cam/issues")
+        self._channel(channels_card, "\uE9CE", "Public FAQ", "Searchable database", "https://github.com/prifulnath/MCX_Cam/blob/main/FAQ.md")
 
-    def _tool_btn(self, parent, col, icon, title, desc, command=None):
-        pad_x = (0, 8) if col == 0 else ((8, 0) if col == 2 else (8, 8))
-        frame = ctk.CTkFrame(parent, fg_color=BG_LOW, corner_radius=6, height=140)
+        # ── Copyright Footer ──────────────────────────────────────────────────
+        foot = ctk.CTkFrame(self, fg_color="#080808", corner_radius=0,
+                            border_width=1, border_color="#1a1a1a")
+        foot.grid(row=2, column=0, sticky="ew")
+        foot.grid_columnconfigure(1, weight=1)
+
+        status_lbl = ctk.CTkFrame(foot, fg_color="transparent")
+        status_lbl.grid(row=0, column=0, padx=20, pady=8, sticky="w")
+        ctk.CTkLabel(status_lbl, text="\u25CF ", font=("Segoe UI", 9),
+                     text_color=GREEN).pack(side="left")
+        ctk.CTkLabel(status_lbl, text="MCX SYSTEM STATUS: ",
+                     font=("Space Grotesk", 9, "bold"), text_color=TEXT_DIM).pack(side="left")
+        ctk.CTkLabel(status_lbl, text="OPERATIONAL",
+                     font=("Space Grotesk", 9, "bold"), text_color=GREEN).pack(side="left")
+
+        ctk.CTkLabel(foot, text="\u00A9 2026 MalluCodeX / ALL RIGHTS RESERVED",
+                     font=("Space Grotesk", 8), text_color="#444444"
+                     ).grid(row=0, column=1, padx=20, pady=8, sticky="e")
+
+    def _tool_btn(self, parent, col, icon, title, desc, command=None, obs_mode=False):
+        last_col = 2
+        pad_x = (0, 8) if col == 0 else ((8, 0) if col == last_col else (8, 8))
+        icon_color = "#b48bff" if obs_mode else GREEN
+        frame = ctk.CTkFrame(parent, fg_color=BG_LOW, corner_radius=6, height=110)
         frame.grid(row=0, column=col, sticky="nsew", padx=pad_x)
         frame.grid_propagate(False)
         frame.grid_columnconfigure(0, weight=1)
         inner = ctk.CTkFrame(frame, fg_color="transparent")
-        inner.pack(anchor="w", padx=20, pady=20)
-        icon_lbl   = ctk.CTkLabel(inner, text=icon,  font=("Segoe MDL2 Assets", 24), text_color=GREEN)
-        icon_lbl.pack(anchor="w", pady=(0, 12))
+        inner.pack(anchor="w", padx=16, pady=14)
+        icon_lbl   = ctk.CTkLabel(inner, text=icon,  font=("Segoe MDL2 Assets", 22), text_color=icon_color)
+        icon_lbl.pack(anchor="w", pady=(0, 8))
         title_lbl  = ctk.CTkLabel(inner, text=title, font=("Space Grotesk", 12, "bold"), text_color=TEXT)
         title_lbl.pack(anchor="w")
         desc_lbl   = ctk.CTkLabel(inner, text=desc,  font=("Space Grotesk", 11), text_color=TEXT_DIM)
@@ -122,14 +144,15 @@ class SupportFrame(ctk.CTkFrame):
             if command:
                 w.bind("<Button-1>", lambda e, c=command: c())
 
-    def _doc(self, parent, icon, title, desc):
+    def _doc(self, parent, icon, title, desc, command=None, obs_mode=False):
         row = ctk.CTkFrame(parent, fg_color=BG_PANEL, corner_radius=6)
-        row.pack(fill="x", padx=20, pady=(0, 12))
+        row.pack(fill="x", padx=16, pady=(0, 8))
         
         left_box = ctk.CTkFrame(row, fg_color="transparent")
-        left_box.pack(side="left", padx=16, pady=16)
+        left_box.pack(side="left", padx=14, pady=12)
         
-        icon_lbl = ctk.CTkLabel(left_box, text=icon, font=("Segoe MDL2 Assets", 20), text_color=TEXT_DIM)
+        accent = "#b48bff" if obs_mode else TEXT_DIM
+        icon_lbl = ctk.CTkLabel(left_box, text=icon, font=("Segoe MDL2 Assets", 20), text_color=accent)
         icon_lbl.pack(side="left", padx=(0, 16))
         
         text_box = ctk.CTkFrame(left_box, fg_color="transparent")
@@ -139,19 +162,26 @@ class SupportFrame(ctk.CTkFrame):
         desc_lbl = ctk.CTkLabel(text_box, text=desc, font=("Space Grotesk", 11), text_color=TEXT_DIM)
         desc_lbl.pack(anchor="w")
         
-        chevron = ctk.CTkLabel(row, text="\uE76C", font=("Segoe MDL2 Assets", 14), text_color=TEXT_DIM)
+        chevron_icon = "\uE8A7" if command else "\uE76C"
+        chevron = ctk.CTkLabel(row, text=chevron_icon, font=("Segoe MDL2 Assets", 14), text_color=TEXT_DIM)
         chevron.pack(side="right", padx=16)
         
+        hover_color = "#b48bff" if obs_mode else GREEN
         def on_enter(e):
             row.configure(fg_color=BG_HIGHEST)
-            icon_lbl.configure(text_color=GREEN)
+            icon_lbl.configure(text_color=hover_color)
         def on_leave(e):
             row.configure(fg_color=BG_PANEL)
-            icon_lbl.configure(text_color=TEXT_DIM)
+            icon_lbl.configure(text_color=accent)
             
         for w in [row, left_box, icon_lbl, text_box, title_lbl, desc_lbl, chevron]:
             w.bind("<Enter>", on_enter)
             w.bind("<Leave>", on_leave)
+            if command:
+                w.bind("<Button-1>", lambda e, c=command: c())
+
+
+
 
     def _test_camera(self):
         console = self.app_ref.frames.get("Console")
@@ -207,7 +237,7 @@ class SupportFrame(ctk.CTkFrame):
 
     def _channel(self, parent, icon, title, desc, link):
         row = ctk.CTkFrame(parent, fg_color="transparent")
-        row.pack(fill="x", padx=24, pady=(0, 16))
+        row.pack(fill="x", padx=20, pady=(0, 10))
         
         icon_box = ctk.CTkFrame(row, fg_color=BG_HIGHEST, corner_radius=6, width=40, height=40)
         icon_box.pack(side="left", padx=(0, 16))

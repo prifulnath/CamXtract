@@ -16,7 +16,7 @@ class MenuFrame(ctk.CTkFrame):
         self.grid(row=1, column=0, sticky="nsew")
         self.grid_propagate(False)
         self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(6, weight=1)
+        self.grid_rowconfigure(7, weight=1)
 
         # Node badge
         badge = ctk.CTkFrame(self, fg_color="transparent")
@@ -33,14 +33,15 @@ class MenuFrame(ctk.CTkFrame):
         info.pack(side="left", fill="y", pady=(2, 0))
         self.app_ref.node_badge_label = ctk.CTkLabel(info, text="MCX-01", font=("Segoe UI", 14, "bold"), text_color=GREEN, anchor="w", height=18)
         self.app_ref.node_badge_label.pack(anchor="w", pady=0)
-        ctk.CTkLabel(info, text="ACTIVE NODE", font=("Segoe UI", 9), text_color=TEXT_DIM, anchor="w", height=12).pack(anchor="w", pady=(0, 0), padx=(1, 0))
+        ctk.CTkLabel(info, text="V0.0.1", font=("Segoe UI", 9), text_color=TEXT_DIM, anchor="w", height=12).pack(anchor="w", pady=(0, 0), padx=(1, 0))
 
         # Nav items
         nav_items = [
-            ("\uE756", "Console",        True),
-            ("\uE713", "Server Settings", False),
-            ("\uE774", "Network Info",   False),
-            ("\uE72E", "Security Log",   False),
+            ("\uE756", "Console",         True),
+            ("\uE713", "Server Settings",  False),
+            ("\uE774", "Network Info",    False),
+            ("\uE91C", "Security Log",    False),
+            ("\uE722", "Camera Monitor",  False),
         ]
         
         self.app_ref.nav_buttons = {}
@@ -60,32 +61,35 @@ class MenuFrame(ctk.CTkFrame):
             
             self.app_ref.nav_buttons[label] = {"frame": row_frame, "label": lbl, "indicator": indicator}
 
-        # Spacer fills remaining space
-        ctk.CTkLabel(self, text="", fg_color="transparent").grid(row=6, column=0, sticky="nsew")
-        self.grid_rowconfigure(6, weight=1)
+        # Spacer fills remaining space (no visual widget needed)
+        self.grid_rowconfigure(7, weight=1)
 
         # Keep a hidden dummy so gui.py's deploy_btn.configure() doesn't crash
         self.deploy_btn = ctk.CTkButton(self, text="", fg_color="transparent", height=0)
 
         # Horizontal separator above bottom nav
-        sep = ctk.CTkFrame(self, fg_color="#262626", height=1, corner_radius=0)
-        sep.grid(row=7, column=0, sticky="ew", padx=12, pady=(0, 4))
+        sep = ctk.CTkFrame(self, fg_color="#2a4035", height=2, corner_radius=0)
+        sep.grid(row=8, column=0, sticky="ew", padx=14, pady=(6, 2))
 
         # Bottom nav
-        for i, (icon, label) in enumerate([("\uE72E", "Vault"), ("\uE897", "Support")]):
+        for i, (icon, label) in enumerate([("\uEBD3", "Vault"), ("\uE939", "Support")]):
             row_frame = ctk.CTkFrame(self, fg_color="transparent", corner_radius=0)
-            row_frame.grid(row=8 + i, column=0, padx=0, pady=0, sticky="ew")
+            row_frame.grid(row=9 + i, column=0, padx=0, pady=0, sticky="ew")
             row_frame.bind("<Button-1>", lambda e, n=label: self.app_ref.show_frame(n))
-            
+
             indicator = ctk.CTkFrame(row_frame, width=3, height=0)
             indicator.pack(side="left", fill="y")
             indicator.configure(fg_color="transparent")
 
-            lbl = ctk.CTkLabel(row_frame, text=f"   {icon}   {label}", font=("Segoe UI", 11, "bold"), text_color=TEXT_DIM, anchor="w")
-            lbl.pack(side="left", padx=16, pady=8)
+            lbl = ctk.CTkLabel(row_frame, text=f"  {icon}   {label}",
+                               font=("Segoe UI", 12, "bold"), text_color=TEXT_DIM, anchor="w")
+            lbl.pack(side="left", padx=20, pady=10)
             lbl.bind("<Button-1>", lambda e, n=label: self.app_ref.show_frame(n))
-            
+
             self.app_ref.nav_buttons[label] = {"frame": row_frame, "label": lbl, "indicator": indicator}
+
+        # Bottom padding
+        ctk.CTkFrame(self, fg_color="transparent", height=12).grid(row=11, column=0)
 
     def set_active(self, name):
         """Programmatically highlight a sidebar nav item."""

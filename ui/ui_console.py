@@ -36,7 +36,7 @@ class ConsoleFrame(ctk.CTkFrame):
         
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=0)  # header
-        self.grid_rowconfigure(1, weight=0)  # URL cards
+        self.grid_rowconfigure(1, weight=0)  # URL cards (sender + viewer)
         self.grid_rowconfigure(2, weight=0)  # SSL alert
         self.grid_rowconfigure(3, weight=0)  # stats bar
         self.grid_rowconfigure(4, weight=0)  # log header
@@ -148,7 +148,7 @@ class ConsoleFrame(ctk.CTkFrame):
         self.after(100, self._poll_logs)
 
     # ── URL Card ──────────────────────────────────────────────────────────────
-    def _url_card(self, parent, col, icon, title, badge, desc, url_path, is_secondary=False):
+    def _url_card(self, parent, col, icon, title, badge, desc, url_path, is_secondary=False, obs_mode=False):
         pad_x = (0, 8) if col == 0 else (8, 0)
         card = ctk.CTkFrame(parent, fg_color=BG_CARD, corner_radius=8, border_width=1, border_color=GRAY)
         card.grid(row=0, column=col, padx=pad_x, pady=0, sticky="ew")
@@ -158,9 +158,18 @@ class ConsoleFrame(ctk.CTkFrame):
         top.pack(fill="x", padx=24, pady=(24, 16))
         top.grid_columnconfigure(1, weight=1)
 
-        icon_color = "#45fec9" if is_secondary else GREEN
-        badge_bg = "#162b24" if is_secondary else "#12251a"
-        border_c = "#1b4d3f" if is_secondary else "#183d26"
+        if obs_mode:
+            icon_color = "#b48bff"   # soft violet — OBS brand feel
+            badge_bg   = "#1e1630"
+            border_c   = "#3b2a6a"
+        elif is_secondary:
+            icon_color = "#45fec9"
+            badge_bg   = "#162b24"
+            border_c   = "#1b4d3f"
+        else:
+            icon_color = GREEN
+            badge_bg   = "#12251a"
+            border_c   = "#183d26"
 
         icon_box = ctk.CTkFrame(top, width=48, height=48, fg_color=badge_bg, corner_radius=4, border_width=1, border_color=border_c)
         icon_box.grid_propagate(False)
@@ -176,7 +185,7 @@ class ConsoleFrame(ctk.CTkFrame):
         url_row.pack(fill="x", padx=24, pady=(0, 24))
         url_row.grid_columnconfigure(0, weight=1)
 
-        url_lbl = ctk.CTkLabel(url_row, text=f"https://{self.app_ref.ip}:8000{url_path}", font=("Courier New", 12), text_color=icon_color, anchor="w")
+        url_lbl = ctk.CTkLabel(url_row, text=f"https://{self.app_ref.ip}:{self._server_port}{url_path}", font=("Courier New", 12), text_color=icon_color, anchor="w")
         url_lbl.grid(row=0, column=0, padx=12, pady=10, sticky="w")
                      
         launch_btn = ctk.CTkButton(url_row, text="\uE8A7", width=30, height=30, font=("Segoe MDL2 Assets", 14), 
@@ -188,6 +197,7 @@ class ConsoleFrame(ctk.CTkFrame):
                       hover_color=GRAY_DARK, corner_radius=4, command=lambda l=url_lbl: self._copy(l.cget("text"))).grid(row=0, column=2, padx=(0, 4), pady=4)
 
         self.url_cards_data.append({"label": url_lbl, "path": url_path})
+
 
     # ── Stat block ────────────────────────────────────────────────────────────
     def _stat_block(self, parent, col, label, value):
@@ -331,7 +341,10 @@ class ConsoleFrame(ctk.CTkFrame):
             return
 
         try:
-            from main import app as fastapi_app
+            from fastapi import FastAPI
+            from app.router import router as _router
+            fastapi_app = FastAPI()
+            fastapi_app.include_router(_router)
             config = uvicorn.Config(
                 fastapi_app, host="0.0.0.0", port=self._server_port,
                 ssl_keyfile="key.pem", ssl_certfile="cert.pem",

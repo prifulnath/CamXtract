@@ -132,7 +132,7 @@ class VaultFrame(ctk.CTkFrame):
             ctk.CTkButton(btn_row, text="\uE8C8", width=28, height=28,
                           font=("Segoe MDL2 Assets", 12), fg_color="transparent",
                           text_color=TEXT_DIM, hover_color=BG_HIGHEST, corner_radius=4,
-                          command=lambda v=value: self._copy(v)).pack(side="left", padx=2)
+                          command=lambda k=key: self._copy_displayed(k)).pack(side="left", padx=2)
 
         # Value display
         val_row = ctk.CTkFrame(card, fg_color=BG_CARD_L, corner_radius=4)
@@ -158,6 +158,12 @@ class VaultFrame(ctk.CTkFrame):
     def _copy(self, value):
         self.clipboard_clear()
         self.clipboard_append(value)
+
+    def _copy_displayed(self, key):
+        """Copy the text exactly as it is currently displayed in the value box."""
+        lbl, _ = self._values[key]
+        self.clipboard_clear()
+        self.clipboard_append(lbl.cget("text"))
 
     def _read_cert_fingerprint(self):
         if not os.path.exists("cert.pem"):

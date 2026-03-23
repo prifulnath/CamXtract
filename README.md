@@ -1,471 +1,225 @@
-# MCX Cam App
+# MCX Cam — v0.0.1
+
+> Visual Intelligence Control Node — Local Network Camera Streaming Desktop App
+
+---
 
 ## 🧠 Overview
 
-**MCX Cam App** is a fast, low-latency, peer-to-peer video streaming application built primarily to turn any mobile device into a live webcam feed viewable on a secondary network device (like a laptop or tablet). 
+**MCX Cam** is a fast, low-latency, peer-to-peer video streaming application that turns any mobile device into a live webcam feed viewable on any networked device (laptop, tablet, or secondary monitor).
 
-By using **WebRTC** to stream the video securely between devices and a lightweight **FastAPI WebSocket** server solely for establishing the initial connection, the video data routes directly and locally over your WiFi network. This ensures high privacy, no lag, and zero external cloud video processing.
-
-### ✨ Key Application Features
-* **Seamless P2P Video Streaming:** Direct browser-to-browser connection using bare-metal WebRTC logic for maximum performance.
-* **Dynamic Camera Switching:** Effortlessly flip between the front and rear ("environment") cameras on the sender device without dropping the active WebRTC track or reloading the page.
-* **iOS & Strict Browser Optimization:** Specifically engineered to bypass aggressive browser restrictions by enforcing secure SSL contexts locally and managing strict HTML5 video autoplay policies.
-* **Connection State Management:** Built-in connection queue prevents stream hijacking; if a sender is already active, new devices attempting to broadcast are placed into a "Wait" state.
-* **Clean, Immersive UI:** A full-screen, scroll-locked interface featuring a dynamic floating flip button, a built-in `🔴 Live` badge, and clean connection status overlays.
+Video routes **directly** over your local WiFi via **WebRTC** — no cloud, no lag, no external processing. A lightweight **FastAPI + WebSocket** server handles only the initial peer signaling.
 
 ---
 
-## 📸 Application Demo
+## ✨ Features
 
-| Mobile Sender (Broadcaster) | Desktop Viewer (Watcher) |
-|:---:|:---:|
-| <img src="assets/mobile_sender.webp" width="250" alt="Mobile Sender View"> | <img src="assets/desktop_viewer.webp" width="450" alt="Desktop Viewer View"> |
-
-*(Animated recordings capturing the live WebRTC interface)*
-
----
-
-## 🏗️ High-Level Architecture
-
-```
-[Mobile Browser (Sender)]
-    │
-    │ getUserMedia (camera)
-    ▼
-[WebRTC Peer Connection]
-    │
-    │ (Signaling via WebSocket)
-    ▼
-[FastAPI Signaling Server]
-    ▲
-    │
-[WebRTC Peer Connection]
-    ▲
-    │
-[Laptop Browser (Viewer)]
-```
-
----
-
-## 🔑 Core Technologies
-
-### 1. WebRTC
-
-* Peer-to-peer video streaming
-* Low latency
-* Browser native
-
-### 2. FastAPI
-
-* Used ONLY for signaling
-* No video processing
-
-### 3. WebSocket
-
-* Exchanges signaling messages:
-
-  * SDP Offer
-  * SDP Answer
-  * ICE Candidates
-
-### 4. getUserMedia API
-
-* Access mobile camera from browser
+| Feature | Details |
+|---|---|
+| **P2P Video Streaming** | Browser-to-browser via WebRTC — bare metal, no relays |
+| **Camera Switching** | Flip front/rear without dropping the stream |
+| **iOS Compatibility** | Local SSL + autoplay policy handling for Safari |
+| **Connection Queue** | Prevents stream hijacking; promotes next sender automatically |
+| **Desktop GUI (MCX CAM)** | `customtkinter` app — dark themed, custom title bar, sidebar nav |
+| **Camera Monitor Panel** | Embedded live feed via Edge WebView2 (`tkwebview2`) — no browser needed |
+| **Lazy Panel Loading** | Panels load on first click — instant startup, splash screen on launch |
+| **Server Settings** | Max Viewers, CPU Limiter sliders, Hardware Acceleration toggle, port allocation |
+| **Secure Vault** | Stores SSL cert fingerprint & private key snippet with reveal/copy controls |
+| **Security Log** | Alert cards with IP threat tracking, SSL certificate info |
+| **Support Panel** | Troubleshooting tools, debug protocol, support channels, copyright footer |
+| **OBS Integration** | Browser Source URL for OBS / streaming software |
 
 ---
 
 ## 📁 Project Structure
 
 ```text
-project-root/
-│
+MCX_Cam/
 ├── app/
-│   ├── router.py             # API and page routes
-│   ├── sender/               # Sender (Broadcaster) Module
-│   │   ├── sender.html
-│   │   ├── sender.js
-│   │   └── sender.py
-│   ├── viewer/               # Viewer (Watcher) Module
-│   │   ├── viewer.html
-│   │   ├── viewer.js
-│   │   └── viewer.py
-│   └── ws/                   # WebSocket Module
-│       └── manager.py        
+│   ├── router.py             # FastAPI router aggregator
+│   ├── sender/               # Sender (Broadcaster) module
+│   │   ├── sender.html / .js / .py
+│   ├── viewer/               # Viewer (Watcher) module
+│   │   ├── viewer.html / .js / .py
+│   └── ws/                   # WebSocket signaling
+│       ├── websocket.py
+│       └── manager.py
 │
-├── cert.pem                  # Generated SSL cert (Git ignored)
-├── key.pem                   # Generated SSL key (Git ignored)
-├── generate_cert.py          # Script to generate local SSL certs 
-├── main.py                   # FastAPI Application Entrypoint
-├── requirements.txt          # Python dependencies
-├── .gitignore                # Git ignore configuration
-└── README.md                 # Project Documentation
+├── ui/                       # Desktop GUI panels (customtkinter)
+│   ├── ui_menu.py            # Sidebar navigation (lazy + version badge)
+│   ├── ui_console.py         # Server orchestrator panel
+│   ├── ui_server_settings.py # System parameters + footer stats bar
+│   ├── ui_network_info.py    # Network diagnostics
+│   ├── ui_security_log.py    # Threat alert cards + SSL certificate info
+│   ├── ui_vault.py           # Credential vault (reveal/copy/export)
+│   ├── ui_support.py         # Diagnostics, debug protocol, support channels
+│   └── ui_camera_monitor.py  # Live stream viewer (Edge WebView2)
+│
+├── gui.py                    # App entrypoint — splash screen + lazy loading
+├── main.py                   # FastAPI app creation
+├── run.py                    # CLI server runner
+├── version_info.txt          # Windows EXE version metadata (PyInstaller)
+├── MCX_Cam.spec              # PyInstaller build spec
+├── requirements.txt
+└── README.md
 ```
 
 ---
 
-## ⚙️ Backend (FastAPI Signaling Server)
+## 🏗️ Architecture
 
-### Responsibilities
-
-* Maintain WebSocket connections
-* Relay messages between peers
-
-### Implementation
-
-```python
-from fastapi import FastAPI, WebSocket
-
-app = FastAPI()
-clients = []
-
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()
-    clients.append(websocket)
-    try:
-        while True:
-            data = await websocket.receive_text()
-            for client in clients:
-                if client != websocket:
-                    await client.send_text(data)
-    except:
-        clients.remove(websocket)
 ```
-
----
-
-## 📱 Sender (Mobile Browser)
-
-### Responsibilities
-
-* Access camera
-* Create WebRTC connection
-* Send stream
-
-### Key Steps
-
-1. Access camera
-
-```javascript
-const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-video.srcObject = stream;
+[Mobile Browser (Sender)]
+    │ getUserMedia (camera)
+    ▼
+[WebRTC Peer Connection] ←→ [FastAPI WebSocket Signaling Server]
+    ▲
+    │
+[Viewer Browser / MCX Cam Desktop (WebView2)]
 ```
-
-2. Create PeerConnection
-
-```javascript
-const pc = new RTCPeerConnection({
-  iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
-});
-```
-
-3. Add tracks
-
-```javascript
-stream.getTracks().forEach(track => pc.addTrack(track, stream));
-```
-
-4. Create offer
-
-```javascript
-const offer = await pc.createOffer();
-await pc.setLocalDescription(offer);
-ws.send(JSON.stringify({ type: "offer", data: offer }));
-```
-
----
-
-## 💻 Viewer (Laptop Browser)
-
-### Responsibilities
-
-* Receive stream
-* Display video
-
-### Key Steps
-
-1. Create PeerConnection
-
-```javascript
-const pc = new RTCPeerConnection({
-  iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
-});
-```
-
-2. Receive stream
-
-```javascript
-pc.ontrack = (event) => {
-  video.srcObject = event.streams[0];
-};
-```
-
-3. Handle offer
-
-```javascript
-await pc.setRemoteDescription(offer);
-const answer = await pc.createAnswer();
-await pc.setLocalDescription(answer);
-ws.send(JSON.stringify({ type: "answer", data: answer }));
-```
-
----
-
-## 🔄 Signaling Flow
-
-1. Sender creates **Offer** → sends via WebSocket
-2. Viewer receives Offer → creates **Answer**
-3. Viewer sends Answer → Sender receives
-4. Both exchange **ICE candidates**
-5. Direct WebRTC connection established
 
 ---
 
 ## 🚀 Setup & Installation
 
-### 1. Create a Virtual Environment (Optional but Recommended)
+### 1. Create Virtual Environment
+
 ```powershell
 python -m venv .venv
-# On Windows:
 .venv\Scripts\Activate.ps1
-# On Mac/Linux:
-source .venv/bin/activate
 ```
 
 ### 2. Install Dependencies
+
 ```powershell
 pip install -r requirements.txt
-pip install cryptography  # Used for local self-signed certificates
 ```
+
+> **Note:** `pywebview` is pinned to `4.4.1` and `tkwebview2` to `3.5.0` for compatibility with the embedded camera monitor.
 
 ---
 
-## 🔐 Generating Local SSL Certificates (For iOS Testing)
+## 🌐 Running the Server (Development)
 
-Because iOS permanently blocks the camera over standard `http://` on local networks, you need to generate a self-signed SSL Certificate specifically designed for your IP address.
-
-Run the certificate generator:
 ```powershell
-python generate_cert.py
+python run.py
 ```
-> **Note:** If your computer gets a new IP assigned to it, you may need to edit `ip_addr` in `generate_cert.py` and run it again to get a fresh certificate.
 
----
-
-## 🌐 Network Setup & Running the Server
-
-Once you have your `key.pem` and `cert.pem`, start the Uvicorn ASGI server with SSL enabled:
+Or directly via uvicorn:
 
 ```powershell
 uvicorn main:app --host 0.0.0.0 --port 8000 --ssl-keyfile key.pem --ssl-certfile cert.pem
 ```
 
-*(The `main.py` is configured to intelligently serve the HTML pages automatically without breaking).*
+### Endpoints
 
-### Accessing the Endpoints
+| Role | URL |
+|---|---|
+| **Sender (Mobile)** | `https://<YOUR_LOCAL_IP>:8000/sender.html` |
+| **Viewer (Desktop)** | `https://<YOUR_LOCAL_IP>:8000/viewer.html` |
+| **OBS Browser Source** | `https://<YOUR_LOCAL_IP>:8000/obs.html` |
 
-If your server IP was `192.168.220.37` (replace with your actual local IP):
-
-* **The Sender App:** `https://<YOUR_LOCAL_IP>:8000/sender.html`
-* **The Viewer App:** `https://<YOUR_LOCAL_IP>:8000/viewer.html`
-
-> **Note:** When initially visiting your own `https://` endpoint, your browser will warn you the connection is "Not Private" because it's a self-signed local certificate. Click **"Advanced -> Proceed"** or **"Show Details -> Visit this website"** to securely access your stream.
-
----
-
-## ⚠️ Edge Cases & Considerations
-
-### 1. Camera Permissions
-
-* Must be allowed in browser
-* Requires secure context (HTTPS or local IP)
-
-### 2. Network Issues
-
-* Both devices must be on same WiFi
-* Firewall should allow port access
-
-### 3. ICE Failure
-
-* Add STUN server (already included)
-* For strict networks, TURN may be needed
-
-### 4. Multiple Viewers
-
-* Current setup is 1-to-1
-* For multiple viewers:
-
-  * Use SFU (Selective Forwarding Unit)
-
-### 5. Mobile Compatibility
-
-* Works best in Chrome
-* Safari may require HTTPS
-
-### 6. Performance
-
-* WebRTC is efficient
-* Avoid sending raw frames manually
+> First visit will prompt a self-signed cert warning — click **Advanced → Proceed**.
 
 ---
 
-## 🚀 Future Enhancements
+## 📦 Building the Standalone `.exe`
 
-* Multi-user broadcasting
-* Audio streaming
-* Camera switching (front/back)
-* Recording streams
-* QR code for quick connection
-* Authentication
-
----
-
-## 📦 Building a Standalone `.exe` (Windows)
-
-You can package the entire MCX Cam App into a **single portable `.exe` file** using PyInstaller. No Python installation is required on the target machine.
-
-### 1. Install PyInstaller
-
-Make sure your virtual environment is active, then run:
+### Using the Spec File (Recommended)
 
 ```powershell
-pip install pyinstaller
+.venv\Scripts\pyinstaller MCX_Cam.spec
 ```
 
-### 2. Build the Executable
+Output: `dist\MCX_Cam.exe`
 
-From the project root, run:
+> ⚠️ Close `MCX_Cam.exe` before rebuilding — Windows locks the file while it's open.
 
-```powershell
-pyinstaller --name "MCX_Cam_Server" --onefile --console `
-  --add-data "app;app" `
-  --hidden-import "uvicorn.logging" `
-  --hidden-import "uvicorn.loops" `
-  --hidden-import "uvicorn.loops.auto" `
-  --hidden-import "uvicorn.protocols" `
-  --hidden-import "uvicorn.protocols.http" `
-  --hidden-import "uvicorn.protocols.http.auto" `
-  --hidden-import "uvicorn.protocols.websockets" `
-  --hidden-import "uvicorn.protocols.websockets.auto" `
-  --hidden-import "uvicorn.lifespan" `
-  --hidden-import "uvicorn.lifespan.on" `
-  --hidden-import "cryptography" `
-  --hidden-import "fastapi" `
-  --hidden-import "starlette" `
-  run.py
-```
+### Manual Build (with version info)
 
 ```powershell
-.venv\Scripts\pyinstaller --name "MCX_Cam" --icon "app\mcx_logo.ico" --onefile --windowed `
-  --add-data "app;app" `
-  --hidden-import "uvicorn.logging" `
-  --hidden-import "uvicorn.loops" `
-  --hidden-import "uvicorn.loops.auto" `
-  --hidden-import "uvicorn.protocols" `
-  --hidden-import "uvicorn.protocols.http" `
-  --hidden-import "uvicorn.protocols.http.auto" `
+.venv\Scripts\pyinstaller --version-file version_info.txt `
+  --name "MCX_Cam" --icon "app\mcx_logo.ico" --onefile --windowed `
+  --add-data "app;app" --add-data "ui;ui" `
+  --hidden-import "uvicorn.logging" --hidden-import "uvicorn.loops" `
+  --hidden-import "uvicorn.loops.auto" --hidden-import "uvicorn.protocols" `
+  --hidden-import "uvicorn.protocols.http" --hidden-import "uvicorn.protocols.http.auto" `
   --hidden-import "uvicorn.protocols.websockets" `
   --hidden-import "uvicorn.protocols.websockets.auto" `
-  --hidden-import "uvicorn.lifespan" `
-  --hidden-import "uvicorn.lifespan.on" `
-  --hidden-import "cryptography" `
-  --hidden-import "fastapi" `
-  --hidden-import "starlette" `
-  --hidden-import "customtkinter" `
-  --hidden-import "PIL" `
+  --hidden-import "uvicorn.lifespan" --hidden-import "uvicorn.lifespan.on" `
+  --hidden-import "cryptography" --hidden-import "fastapi" `
+  --hidden-import "starlette" --hidden-import "customtkinter" --hidden-import "PIL" `
+  --hidden-import "webview" --hidden-import "webview.platforms" `
+  --hidden-import "webview.platforms.winforms" `
+  --hidden-import "webview.platforms.edgechromium" `
+  --hidden-import "bottle" --hidden-import "clr_loader" --hidden-import "proxy_tools" `
+  --hidden-import "tkwebview2" --hidden-import "tkwebview2.tkwebview2" `
+  --hidden-import "tkwebview2.bind" `
   gui.py
 ```
 
-The output will be at: **`dist\MCX_Cam.exe`** (~22 MB)
+### EXE Version Info (`version_info.txt`)
+
+| Field | Value |
+|---|---|
+| Product Name | MCX Cam |
+| File Version | 0.0.1.0 |
+| Company | MalluCodeX |
+| Copyright | © 2026 MalluCodeX |
+
 ---
 
-## 🖥️ How to Use `MCX_Cam_Server.exe`
+## 🖥️ Using `MCX_Cam.exe`
 
-### Step 1 — Copy the `.exe`
+1. Place the `.exe` anywhere with **write access** (not `Program Files`)
+2. Double-click to run — a splash screen appears while the app loads
+3. On first run: SSL certs are auto-generated for your local IP
+4. Click **START SERVER** in the Console panel
+5. Open the Sender URL on mobile, Viewer URL on desktop
 
-Place `MCX_Cam_Server.exe` anywhere on your Windows machine (e.g. Desktop or any user folder).
-
-> ⚠️ **Do NOT place it inside `Program Files`** — it needs write access to that folder to generate the SSL certificate files.
-
-### Step 2 — Run It
-
-Double-click the `.exe`, or launch it from a terminal:
-
-```powershell
-.\MCX_Cam_Server.exe
-```
-
-### Step 3 — What Happens Automatically
-
-On **first launch**, the app will:
-1. 🔐 Detect that `key.pem` / `cert.pem` are missing
-2. Auto-detect your machine's **local IP address**
-3. Generate a **self-signed SSL certificate** valid for 365 days
-4. Start the HTTPS server on port `8000`
-
-On **subsequent launches**, it skips the certificate generation and starts the server immediately.
-
-### Step 4 — Open the App
-
-The console will display your exact URLs:
-
-```
-=======================================================
-  🎥  MCX Cam — Local Network Camera App
-=======================================================
-  📱 Sender (Mobile) : https://192.168.x.x:8000/sender.html
-  💻 Viewer (Desktop): https://192.168.x.x:8000/viewer.html
-
-  ⚠️  On first visit, click 'Advanced → Proceed'
-     to bypass the self-signed cert warning.
-=======================================================
-```
-
-* Open the **Sender** URL on your mobile device (must be on same WiFi)
-* Open the **Viewer** URL on your laptop or secondary device
-
-### Step 5 — Trust the Certificate (One Time Only)
-
-Since the cert is self-signed, your browser will show a security warning on the **first visit**:
+### Accepting the Self-Signed Certificate
 
 | Browser | Steps |
 |---|---|
-| **Chrome** | Click `Advanced` → `Proceed to <IP> (unsafe)` |
-| **Safari (iOS)** | Tap `Show Details` → `Visit this website` → `Visit website` |
-| **Firefox** | Click `Advanced...` → `Accept the Risk and Continue` |
+| **Chrome** | `Advanced` → `Proceed to <IP> (unsafe)` |
+| **Safari (iOS)** | `Show Details` → `Visit this website` |
+| **Firefox** | `Advanced...` → `Accept the Risk and Continue` |
 
-After accepting, the camera and stream will work normally. You'll only need to do this once per device per certificate.
-
-### ♻️ Regenerating the Certificate
-
-If your **computer's IP address changes** (e.g. after reconnecting to WiFi), the old certificate will no longer work for that IP. To regenerate:
-
-1. Delete `key.pem` and `cert.pem` from the same folder as the `.exe`
-2. Re-run `MCX_Cam_Server.exe` — it will auto-generate fresh certificates for the new IP
+> If your IP changes, delete `key.pem` and `cert.pem` and relaunch to auto-regenerate.
 
 ---
 
-## ✅ Summary
+## 🔑 Core Technologies
 
-This system:
-
-* Uses **WebRTC for real-time streaming**
-* Uses **FastAPI only for signaling**
-* Works fully inside a **local network**
-
-This architecture is lightweight, scalable, and suitable for real-time applications.
-
----
-
-## 📌 Instructions for Coding Agents
-
-* Implement backend signaling first
-* Build minimal sender/viewer pages
-* Ensure WebSocket message format consistency
-* Test on same WiFi network
-* Add ICE handling carefully
-* Start with single peer connection before scaling
+| Technology | Role |
+|---|---|
+| **WebRTC** | Peer-to-peer video streaming |
+| **FastAPI + WebSocket** | Signaling server only |
+| **customtkinter** | Desktop GUI framework |
+| **tkwebview2 / Edge WebView2** | Embedded camera feed viewer |
+| **cryptography** | Local SSL certificate generation |
+| **PyInstaller** | Single-file Windows executable |
 
 ---
 
-END OF DOCUMENT
+## 🔮 Future Enhancements
+
+- Multi-viewer broadcasting (SFU)
+- Audio streaming
+- Stream recording
+- QR code for quick mobile connection
+- Token-based stream authentication
+- Virtual camera device output
+
+---
+
+## 📌 Notes for Developers
+
+- `gui.py` uses lazy panel loading — panels instantiate on first click, not at startup
+- `main.py` is the FastAPI app factory; `ui_console.py` creates a fresh FastAPI instance inline to avoid `from main import app` failing in frozen executables
+- `pywebview` must stay at `4.4.1` — newer versions break `tkwebview2 3.5.0` compatibility
+- The custom title bar uses `overrideredirect(True)` — minimize uses Win32 `ShowWindow(hwnd, SW_MINIMIZE)` directly
+
+---
+
+*© 2026 MalluCodeX. All rights reserved.*
