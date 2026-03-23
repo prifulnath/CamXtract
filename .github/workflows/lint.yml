@@ -1,0 +1,38 @@
+name: Lint & Syntax Check
+
+on: [push, pull_request]
+
+jobs:
+  lint:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install flake8
+        run: pip install flake8
+
+      - name: Lint — fatal errors only (syntax / undefined names)
+        run: |
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics `
+            --exclude=.venv,build,dist,__pycache__
+
+      - name: Lint — style warnings (non-blocking)
+        run: |
+          flake8 . --count --exit-zero --max-line-length=127 --max-complexity=10 --statistics `
+            --exclude=.venv,build,dist,__pycache__
+
+      - name: Install pylint
+        run: pip install pylint
+
+      - name: Pylint (non-blocking)
+        run: |
+          pylint gui.py ui/ `
+            --disable=C0114,C0115,C0116,E0401,R0903,R0801,W0401 `
+            --max-line-length=127 `
+            --exit-zero
