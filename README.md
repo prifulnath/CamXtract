@@ -1,4 +1,4 @@
-# MCX Cam — v0.0.1
+# MCodeX Cam — v0.0.1
 
 > Visual Intelligence Control Node — Local Network Camera Streaming Desktop App
 
