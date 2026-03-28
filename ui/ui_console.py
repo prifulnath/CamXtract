@@ -55,7 +55,7 @@ class ConsoleFrame(ctk.CTkFrame):
         titles = ctk.CTkFrame(header, fg_color="transparent")
         titles.grid(row=0, column=0, sticky="w", padx=20, pady=20)
         ctk.CTkLabel(titles, text="Server Orchestrator", font=("Segoe UI", 22, "bold"), text_color=TEXT).pack(anchor="w")
-        ctk.CTkLabel(titles, text="Manage your MCX Node and connected stream clients.", font=("Segoe UI", 11), text_color=TEXT_DIM).pack(anchor="w")
+        ctk.CTkLabel(titles, text="Manage your CamXtract Node and connected stream clients.", font=("Segoe UI", 11), text_color=TEXT_DIM).pack(anchor="w")
 
         btns = ctk.CTkFrame(header, fg_color="transparent")
         btns.grid(row=0, column=1, sticky="e", padx=20, pady=20)
@@ -83,7 +83,7 @@ class ConsoleFrame(ctk.CTkFrame):
 
         self._url_card(cards, col=0, icon="\uE8EA", title="Sender (Mobile)", badge="PRIMARY INPUT",
                        desc="Initialize camera stream from any mobile device node.", url_path="/sender.html", is_secondary=False)
-        self._url_card(cards, col=1, icon="\uE7F4", title="MCX Cam Desktop Dashboard", badge="STREAM OUTPUT",
+        self._url_card(cards, col=1, icon="\uE7F4", title="CamXtract Desktop Dashboard", badge="STREAM OUTPUT",
                        desc="Launch the localized hub interface.", url_path="/viewer.html", is_secondary=True)
 
         # ── SSL Alert Box ─────────────────────────────────────────────────────

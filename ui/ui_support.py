@@ -30,7 +30,7 @@ class SupportFrame(ctk.CTkFrame):
         header.grid_columnconfigure(0, weight=1)
         
         ctk.CTkLabel(header, text="System Support", font=("Space Grotesk", 36, "bold"), text_color=TEXT).pack(anchor="w", pady=(0, 4))
-        ctk.CTkLabel(header, text="Diagnostics and technical assistance console for MCX-CAM visual intelligence infrastructure.", font=("Space Grotesk", 14), text_color=TEXT_DIM).pack(anchor="w")
+        ctk.CTkLabel(header, text="Diagnostics and technical assistance console for CamXtract visual intelligence infrastructure.", font=("Space Grotesk", 14), text_color=TEXT_DIM).pack(anchor="w")
 
         # Bento Grid Configuration
         content = ctk.CTkFrame(self, fg_color="transparent")
@@ -61,7 +61,7 @@ class SupportFrame(ctk.CTkFrame):
         
         self._tool_btn(tools_grid, 0, "\uE89A", "TEST CAMERA",    "Open sender URL in browser",   self._test_camera)
         self._tool_btn(tools_grid, 1, "\uE8AD", "NETWORK INFO",   "Switch to Network Info panel", self._go_network)
-        self._tool_btn(tools_grid, 2, "\uE8CA", "STREAM REFRESH", "Restart the MCX server",       self._stream_refresh)
+        self._tool_btn(tools_grid, 2, "\uE8CA", "STREAM REFRESH", "Restart the CamXtract server",       self._stream_refresh)
 
         # Technical Documentation
         docs_card = ctk.CTkFrame(left, fg_color=BG_LOW, corner_radius=8)
@@ -69,7 +69,7 @@ class SupportFrame(ctk.CTkFrame):
         
         ctk.CTkLabel(docs_card, text="TECHNICAL DOCUMENTATION", font=("Space Grotesk", 11, "bold"), text_color=TEXT_DIM).pack(anchor="w", padx=20, pady=(16, 10))
         
-        self._doc(docs_card, "\uE8A5", "MCX Deployment Guide", "Step-by-step camera provisioning and local setup.")
+        self._doc(docs_card, "\uE8A5", "CamXtract Deployment Guide", "Step-by-step camera provisioning and local setup.")
         self._doc(docs_card, "\uE8D7", "SSL & Security Handshake", "Resolving common certificate and HTTPS warnings.")
         self._doc(docs_card, "\uE90F", "Hardware Fixes", "Manual focus adjustment and IR filter troubleshooting.")
 
@@ -98,8 +98,8 @@ class SupportFrame(ctk.CTkFrame):
         ctk.CTkLabel(channels_card, text="SUPPORT CHANNELS", font=("Space Grotesk", 11, "bold"), text_color=TEXT_DIM).pack(anchor="w", padx=20, pady=(16, 10))
         
         self._channel(channels_card, "\uE715", "Email Support", "Response in 24h", "mailto:prifulnath@gmail.com")
-        self._channel(channels_card, "\uE8EF", "GitHub Issues", "Community tracker", "https://github.com/prifulnath/MCX_Cam/issues")
-        self._channel(channels_card, "\uE9CE", "Public FAQ", "Searchable database", "https://github.com/prifulnath/MCX_Cam/blob/main/FAQ.md")
+        self._channel(channels_card, "\uE8EF", "GitHub Issues", "Community tracker", "https://github.com/prifulnath/CamXtract/issues")
+        self._channel(channels_card, "\uE9CE", "Public FAQ", "Searchable database", "https://github.com/prifulnath/CamXtract/blob/main/FAQ.md")
 
         # ── Copyright Footer ──────────────────────────────────────────────────
         foot = ctk.CTkFrame(self, fg_color="#080808", corner_radius=0,
@@ -111,7 +111,7 @@ class SupportFrame(ctk.CTkFrame):
         status_lbl.grid(row=0, column=0, padx=20, pady=8, sticky="w")
         ctk.CTkLabel(status_lbl, text="\u25CF ", font=("Segoe UI", 9),
                      text_color=GREEN).pack(side="left")
-        ctk.CTkLabel(status_lbl, text="MCX SYSTEM STATUS: ",
+        ctk.CTkLabel(status_lbl, text="CamXtract SYSTEM STATUS: ",
                      font=("Space Grotesk", 9, "bold"), text_color=TEXT_DIM).pack(side="left")
         ctk.CTkLabel(status_lbl, text="OPERATIONAL",
                      font=("Space Grotesk", 9, "bold"), text_color=GREEN).pack(side="left")
@@ -215,12 +215,12 @@ class SupportFrame(ctk.CTkFrame):
         )
         if path:
             with open(path, "w") as f:
-                f.write(f"MCX CAM \u2014 System Log Export\n{'='*40}\n{content}")
+                f.write(f"CamXtract \u2014 System Log Export\n{'='*40}\n{content}")
 
     def _core_dump(self):
         info = platform.uname()
         content = (
-            f"MCX CAM \u2014 Core Dump\n{'='*40}\n"
+            f"CamXtract \u2014 Core Dump\n{'='*40}\n"
             f"System:    {info.system}\n"
             f"Node:      {info.node}\n"
             f"Release:   {info.release}\n"

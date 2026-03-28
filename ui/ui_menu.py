@@ -31,17 +31,18 @@ class MenuFrame(ctk.CTkFrame):
 
         info = ctk.CTkFrame(badge_inner, fg_color="transparent")
         info.pack(side="left", fill="y", pady=(2, 0))
-        self.app_ref.node_badge_label = ctk.CTkLabel(info, text="MCX-01", font=("Segoe UI", 14, "bold"), text_color=GREEN, anchor="w", height=18)
+        self.app_ref.node_badge_label = ctk.CTkLabel(info, text="CamXtract-01", font=("Segoe UI", 14, "bold"), text_color=GREEN, anchor="w", height=18)
         self.app_ref.node_badge_label.pack(anchor="w", pady=0)
         ctk.CTkLabel(info, text="V0.0.1", font=("Segoe UI", 9), text_color=TEXT_DIM, anchor="w", height=12).pack(anchor="w", pady=(0, 0), padx=(1, 0))
 
         # Nav items
         nav_items = [
-            ("\uE756", "Console",         True),
-            ("\uE713", "Server Settings",  False),
-            ("\uE774", "Network Info",    False),
-            ("\uE91C", "Security Log",    False),
-            ("\uE722", "Camera Monitor",  False),
+            ("\uE756", "Console",          True),
+            ("\uE713", "Server Settings",   False),
+            ("\uE714", "Camera Controls",   False),
+            ("\uE774", "Network Info",      False),
+            ("\uE91C", "Security Log",      False),
+            ("\uE722", "Camera Monitor",    False),
         ]
         
         self.app_ref.nav_buttons = {}

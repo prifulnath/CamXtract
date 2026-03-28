@@ -22,7 +22,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='MCX_Cam_v0.0.1',
+    name='CamXtract',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -36,5 +36,5 @@ exe = EXE(
     codesign_identity=None,
     entitlements_file=None,
     version='version_info.txt',
-    icon=['app\\mcx_logo.ico'],
+    icon=['app\\camxtract_logo.ico'],
 )

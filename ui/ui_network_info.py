@@ -366,7 +366,7 @@ class NetworkInfoFrame(ctk.CTkFrame):
         lat    = self._lat_lbl.cget("text")
         loss   = self._loss_lbl.cget("text")
         content = (
-            f"MCX CAM \u2014 Network Info Export\n{'='*40}\n"
+            f"CamXtract \u2014 Network Info Export\n{'='*40}\n"
             f"Local IP:     {local}\nPublic IP:    {public}\n"
             f"Hostname:     {host}\nLatency:      {lat} ms\nPacket Loss:  {loss}%\n"
         )

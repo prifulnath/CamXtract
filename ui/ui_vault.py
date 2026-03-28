@@ -224,7 +224,7 @@ class VaultFrame(ctk.CTkFrame):
                 ctk.CTkLabel(b, text=p, font=("Space Grotesk", 9, "bold"), text_color=GREEN).pack(padx=8, pady=3)
 
     def _export_vault(self):
-        lines = ["MCX CAM — Vault Export\n" + "="*40]
+        lines = ["CamXtract — Vault Export\n" + "="*40]
         for key, (lbl, real_val) in self._values.items():
             lines.append(f"{key}: {real_val}")
         path = filedialog.asksaveasfilename(

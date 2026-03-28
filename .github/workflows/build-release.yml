@@ -24,12 +24,12 @@ jobs:
           pip install pyinstaller
 
       - name: Build EXE with PyInstaller
-        run: .venv\Scripts\pyinstaller MCX_Cam.spec || pyinstaller MCX_Cam.spec
+        run: .venv\Scripts\pyinstaller CamXtract.spec || pyinstaller CamXtract.spec
 
       - name: Upload EXE artifact
         uses: actions/upload-artifact@v4
         with:
-          name: MCX_Cam_${{ github.ref_name }}
+          name: CamXtract_${{ github.ref_name }}
           path: dist/*.exe
 
       - name: Create GitHub Release

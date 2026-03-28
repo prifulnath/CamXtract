@@ -361,5 +361,5 @@ class SecurityLogFrame(ctk.CTkFrame):
                                             title="Export Security Logs")
         if path:
             with open(path, "w") as f:
-                f.write(f"MCX CAM \u2014 Security Log Export\n{'='*40}\n")
+                f.write(f"CamXtract \u2014 Security Log Export\n{'='*40}\n")
                 f.write("\n".join(lines))

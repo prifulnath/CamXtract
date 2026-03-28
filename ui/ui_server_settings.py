@@ -13,7 +13,7 @@ OUTLINE_DIM= "#262626"
 import json
 import os
 
-CONFIG_FILE = "mcx_config.json"
+CONFIG_FILE = "camxtract_config.json"
 
 class ServerSettingsFrame(ctk.CTkFrame):
     def __init__(self, master, app_ref, *args, **kwargs):
@@ -59,7 +59,7 @@ class ServerSettingsFrame(ctk.CTkFrame):
         ctk.CTkLabel(title_frame1, text="\uE8C0", font=("Segoe MDL2 Assets", 18), text_color=GREEN).pack(side="left", padx=(0, 10))
         ctk.CTkLabel(title_frame1, text="BASIC CONTROLS", font=("Segoe UI", 12, "bold"), text_color=TEXT).pack(side="left")
 
-        self.server_name_entry = self._build_input(basic, 1, 0, "SERVER NAME", "MCX-01")
+        self.server_name_entry = self._build_input(basic, 1, 0, "SERVER NAME", "CamXtract-01")
         self.port_entry = self._build_input(basic, 1, 1, "PORT ALLOCATION", "8000")
         self._build_dropdown(basic, 2, 0, "PROTOCOL", ["Secure WebSocket (WSS)", "Standard HTTP", "UDP Blast"], span=2)
         self._build_switch(basic, 3, 0, "Auto-start Engine", "Initialize on system boot", True, span=2)

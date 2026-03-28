@@ -61,7 +61,7 @@ if __name__ == "__main__":
     ip = get_local_ip()
     print()
     print("=" * 55)
-    print("  🎥  MCX Cam — Local Network Camera App")
+    print("  🎥  CamXtract — Local Network Camera App")
     print("=" * 55)
     print(f"  📱 Sender (Mobile) : https://{ip}:8000/sender.html")
     print(f"  💻 Viewer (Desktop): https://{ip}:8000/viewer.html")

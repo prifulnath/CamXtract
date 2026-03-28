@@ -1,18 +1,18 @@
-# MCX Cam — v0.0.1
+# CamXtract — v0.0.1
 
 > Visual Intelligence Control Node — Local Network Camera Streaming Desktop App
 
-[![Download](https://img.shields.io/badge/Download-v0.0.1-brightgreen?style=for-the-badge&logo=github)](https://github.com/prifulnath/MCX_Cam/releases/tag/v0.0.1)
-[![Platform](https://img.shields.io/badge/Platform-Windows%2010%2F11-blue?style=for-the-badge&logo=windows)](https://github.com/prifulnath/MCX_Cam/releases/tag/v0.0.1)
+[![Download](https://img.shields.io/badge/Download-v0.0.1-brightgreen?style=for-the-badge&logo=github)](https://github.com/prifulnath/CamXtract/releases/tag/v0.0.1)
+[![Platform](https://img.shields.io/badge/Platform-Windows%2010%2F11-blue?style=for-the-badge&logo=windows)](https://github.com/prifulnath/CamXtract/releases/tag/v0.0.1)
 [![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 
-> 📥 **[Download MCX_Cam_v0.0.1.exe](https://github.com/prifulnath/MCX_Cam/releases/tag/v0.0.1)** — No installation required. Just download and run.
+> 📥 **[Download CamXtract_v0.0.1.exe](https://github.com/prifulnath/CamXtract/releases/tag/v0.0.1)** — No installation required. Just download and run.
 
 ---
 
 ## 🧠 Overview
 
-**MCX Cam** is a fast, low-latency, peer-to-peer video streaming application that turns any mobile device into a live webcam feed viewable on any networked device (laptop, tablet, or secondary monitor).
+**CamXtract** is a fast, low-latency, peer-to-peer video streaming application that turns any mobile device into a live webcam feed viewable on any networked device (laptop, tablet, or secondary monitor).
 
 Video routes **directly** over your local WiFi via **WebRTC** — no cloud, no lag, no external processing. A lightweight **FastAPI + WebSocket** server handles only the initial peer signaling.
 
@@ -23,10 +23,19 @@ Video routes **directly** over your local WiFi via **WebRTC** — no cloud, no l
 | Feature | Details |
 |---|---|
 | **P2P Video Streaming** | Browser-to-browser via WebRTC — bare metal, no relays |
-| **Camera Switching** | Flip front/rear without dropping the stream |
+| **1080p Full HD / 4K UHD** | Explicit `getUserMedia` constraints; auto-falls back through resolution list if unsupported |
+| **Adaptive Resolution** | Resolution, FPS, and codec configurable per-device via GUI, viewer UI, or `camxtract_config.json` |
+| **Ultra-Low Latency** | `playoutDelayHint=0`, trickle ICE, `latencyMode:"realtime"`, DSCP `"high"` priority |
+| **PC Remote Camera Controls** | Zoom, torch, exposure, resolution, FPS, flip — controllable from viewer page or desktop GUI |
+| **Save / Restore Camera Params** | All camera settings auto-saved to `camxtract_config.json`; restored on next sender load |
+| **Adaptive Bitrate (ABR)** | Bitrate scales automatically (500 Kbps–20 Mbps) based on network conditions |
+| **Codec Preference** | VP9 (default), H.264, VP8, or auto — selectable per session |
+| **Power & CPU Optimised** | Standby 5 fps until viewer connects; tab-hidden pause; inactivity auto-disconnect |
+| **Camera Switching** | Flip front/rear without dropping the WebRTC stream |
 | **iOS Compatibility** | Local SSL + autoplay policy handling for Safari |
 | **Connection Queue** | Prevents stream hijacking; promotes next sender automatically |
-| **Desktop GUI (MCX CAM)** | `customtkinter` app — dark themed, custom title bar, sidebar nav |
+| **Desktop GUI (CamXtract)** | `customtkinter` app — dark themed, custom title bar, sidebar nav |
+| **Camera Controls Panel** | GUI panel for live remote control, codec/bitrate settings, save/load/reset profiles |
 | **Camera Monitor Panel** | Embedded live feed via Edge WebView2 (`tkwebview2`) — no browser needed |
 | **Lazy Panel Loading** | Panels load on first click — instant startup, splash screen on launch |
 | **Server Settings** | Max Viewers, CPU Limiter sliders, Hardware Acceleration toggle, port allocation |
@@ -40,21 +49,24 @@ Video routes **directly** over your local WiFi via **WebRTC** — no cloud, no l
 ## 📁 Project Structure
 
 ```text
-MCX_Cam/
+CamXtract/
 ├── app/
 │   ├── router.py             # FastAPI router aggregator
+│   ├── api/
+│   │   └── camera_config.py  # GET/PUT/reset /api/camera-config endpoint
 │   ├── sender/               # Sender (Broadcaster) module
 │   │   ├── sender.html / .js / .py
 │   ├── viewer/               # Viewer (Watcher) module
 │   │   ├── viewer.html / .js / .py
 │   └── ws/                   # WebSocket signaling
 │       ├── websocket.py
-│       └── manager.py
+│       └── manager.py        # Routing: signaling + camera_control + heartbeat
 │
 ├── ui/                       # Desktop GUI panels (customtkinter)
 │   ├── ui_menu.py            # Sidebar navigation (lazy + version badge)
 │   ├── ui_console.py         # Server orchestrator panel
 │   ├── ui_server_settings.py # System parameters + footer stats bar
+│   ├── ui_camera_controls.py # Camera remote control + save/load profile
 │   ├── ui_network_info.py    # Network diagnostics
 │   ├── ui_security_log.py    # Threat alert cards + SSL certificate info
 │   ├── ui_vault.py           # Credential vault (reveal/copy/export)
@@ -62,10 +74,11 @@ MCX_Cam/
 │   └── ui_camera_monitor.py  # Live stream viewer (Edge WebView2)
 │
 ├── gui.py                    # App entrypoint — splash screen + lazy loading
-├── main.py                   # FastAPI app creation
+├── main.py                   # FastAPI app + lifespan (heartbeat, inactivity watcher)
 ├── run.py                    # CLI server runner
+├── camxtract_config.json           # Runtime config (server, camera, streaming params)
 ├── version_info.txt          # Windows EXE version metadata (PyInstaller)
-├── MCX_Cam.spec              # PyInstaller build spec
+├── CamXtract.spec              # PyInstaller build spec
 ├── requirements.txt
 └── README.md
 ```
@@ -75,13 +88,25 @@ MCX_Cam/
 ## 🏗️ Architecture
 
 ```
-[Mobile Browser (Sender)]
-    │ getUserMedia (camera)
+[Mobile Browser / Sender]
+    │  getUserMedia (adaptive res: 480p → 1080p → 4K)
+    │  camera_control messages ← PC / GUI
     ▼
-[WebRTC Peer Connection] ←→ [FastAPI WebSocket Signaling Server]
-    ▲
-    │
-[Viewer Browser / MCX Cam Desktop (WebView2)]
+[WebRTC Peer Connection]  ←→  [FastAPI WS Signaling Server]
+    │                          (heartbeat, inactivity watcher, camera_control relay)
+    ▼
+[Viewer Browser / CamXtract Desktop (WebView2)]
+    │  PC Remote Control Bar (zoom, torch, exposure, resolution, FPS, flip)
+    └─ CamXtract GUI: Camera Controls Panel (save / load / reset profile)
+```
+
+### Config Flow
+
+```
+camxtract_config.json  ←──→  GET/PUT /api/camera-config  ←──→  sender.js (auto-restore)
+                                  ↕
+                         GUI Camera Controls Panel
+                         (Save Profile / Load Profile / Reset Defaults)
 ```
 
 ---
@@ -124,6 +149,9 @@ uvicorn main:app --host 0.0.0.0 --port 8000 --ssl-keyfile key.pem --ssl-certfile
 | **Sender (Mobile)** | `https://<YOUR_LOCAL_IP>:8000/sender.html` |
 | **Viewer (Desktop)** | `https://<YOUR_LOCAL_IP>:8000/viewer.html` |
 | **OBS Browser Source** | `https://<YOUR_LOCAL_IP>:8000/obs.html` |
+| **Camera Config (GET)** | `https://<YOUR_LOCAL_IP>:8000/api/camera-config` |
+| **Camera Config (PUT)** | `https://<YOUR_LOCAL_IP>:8000/api/camera-config` |
+| **Camera Config Reset** | `https://<YOUR_LOCAL_IP>:8000/api/camera-config/reset` (POST) |
 
 > First visit will prompt a self-signed cert warning — click **Advanced → Proceed**.
 
@@ -134,18 +162,18 @@ uvicorn main:app --host 0.0.0.0 --port 8000 --ssl-keyfile key.pem --ssl-certfile
 ### Using the Spec File (Recommended)
 
 ```powershell
-.venv\Scripts\pyinstaller MCX_Cam.spec
+.venv\Scripts\pyinstaller CamXtract.spec
 ```
 
-Output: `dist\MCX_Cam.exe`
+Output: `dist\CamXtract.exe`
 
-> ⚠️ Close `MCX_Cam.exe` before rebuilding — Windows locks the file while it's open.
+> ⚠️ Close `CamXtract.exe` before rebuilding — Windows locks the file while it's open.
 
 ### Manual Build (with version info)
 
 ```powershell
 .venv\Scripts\pyinstaller --version-file version_info.txt `
-  --name "MCX_Cam" --icon "app\mcx_logo.ico" --onefile --windowed `
+  --name "CamXtract" --icon "app\camxtract_logo.ico" --onefile --windowed `
   --add-data "app;app" --add-data "ui;ui" `
   --hidden-import "uvicorn.logging" --hidden-import "uvicorn.loops" `
   --hidden-import "uvicorn.loops.auto" --hidden-import "uvicorn.protocols" `
@@ -168,14 +196,14 @@ Output: `dist\MCX_Cam.exe`
 
 | Field | Value |
 |---|---|
-| Product Name | MCX Cam |
+| Product Name | CamXtract |
 | File Version | 0.0.1.0 |
 | Company | MalluCodeX |
 | Copyright | © 2026 MalluCodeX |
 
 ---
 
-## 🖥️ Using `MCX_Cam.exe`
+## 🖥️ Using `CamXtract.exe`
 
 1. Place the `.exe` anywhere with **write access** (not `Program Files`)
 2. Double-click to run — a splash screen appears while the app loads
@@ -199,32 +227,39 @@ Output: `dist\MCX_Cam.exe`
 
 | Technology | Role |
 |---|---|
-| **WebRTC** | Peer-to-peer video streaming |
-| **FastAPI + WebSocket** | Signaling server only |
+| **WebRTC** | Peer-to-peer video streaming (VP9 / H.264 preferred) |
+| **FastAPI + WebSocket** | Signaling server, camera_control relay, REST config API |
 | **customtkinter** | Desktop GUI framework |
 | **tkwebview2 / Edge WebView2** | Embedded camera feed viewer |
 | **cryptography** | Local SSL certificate generation |
+| **requests** | GUI → backend REST calls (save/load camera profile) |
 | **PyInstaller** | Single-file Windows executable |
 
 ---
 
 ## 🔮 Future Enhancements
 
-- Multi-viewer broadcasting (SFU)
+- Multi-viewer broadcasting (SFU / mediasoup)
 - Audio streaming
-- Stream recording
+- Stream recording (server-side capture)
 - QR code for quick mobile connection
 - Token-based stream authentication
 - Virtual camera device output
+- TURN server support for cross-network streaming
+- Per-viewer resolution downscaling (simulcast)
 
 ---
 
 ## 📌 Notes for Developers
 
 - `gui.py` uses lazy panel loading — panels instantiate on first click, not at startup
+- `main.py` uses FastAPI `lifespan` to start `manager.heartbeat()` and `manager.inactivity_watcher()` as background tasks
 - `main.py` is the FastAPI app factory; `ui_console.py` creates a fresh FastAPI instance inline to avoid `from main import app` failing in frozen executables
 - `pywebview` must stay at `4.4.1` — newer versions break `tkwebview2 3.5.0` compatibility
 - The custom title bar uses `overrideredirect(True)` — minimize uses Win32 `ShowWindow(hwnd, SW_MINIMIZE)` directly
+- `ui_camera_controls.py` connects to the server over `wss://` using `websocket-client` as a `register_gui` client — it must be installed separately if needed: `pip install websocket-client`
+- Camera config is persisted in `camxtract_config.json` under the `"CAMERA"` key; the REST endpoint at `/api/camera-config` is the canonical read/write interface
+- When building the `.exe`, add `--hidden-import "requests"` to the PyInstaller command
 
 ---
 

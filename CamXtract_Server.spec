@@ -22,7 +22,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='MCX_Cam_Server',
+    name='CamXtract_Server',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

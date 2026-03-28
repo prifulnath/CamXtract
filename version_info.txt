@@ -17,12 +17,12 @@ VSVersionInfo(
         '040904B0',
         [
           StringStruct('CompanyName',      'MalluCodeX'),
-          StringStruct('FileDescription',  'MCX Cam - Visual Intelligence Control Node'),
+          StringStruct('FileDescription',  'CamXtract - Visual Intelligence Control Node'),
           StringStruct('FileVersion',      '0.0.1.0'),
-          StringStruct('InternalName',     'MCX_Cam'),
+          StringStruct('InternalName',     'CamXtract'),
           StringStruct('LegalCopyright',   '\xa9 2026 MalluCodeX. All rights reserved.'),
-          StringStruct('OriginalFilename', 'MCX_Cam.exe'),
-          StringStruct('ProductName',      'MCX Cam'),
+          StringStruct('OriginalFilename', 'CamXtract.exe'),
+          StringStruct('ProductName',      'CamXtract'),
           StringStruct('ProductVersion',   '0.0.1'),
         ]
       )

@@ -1,4 +1,4 @@
-# MCX Cam — Frequently Asked Questions (FAQ)
+# CamXtract — Frequently Asked Questions (FAQ)
 
 *Version 0.0.1 · MalluCodeX*
 
@@ -6,27 +6,27 @@
 
 ## 🚀 Getting Started
 
-**Q: What is MCX Cam?**  
-MCX Cam is a desktop application that turns any mobile device into a live webcam, streaming video directly to your computer over your local WiFi network using WebRTC — no internet or cloud required.
+**Q: What is CamXtract?**  
+CamXtract is a desktop application that turns any mobile device into a live webcam, streaming video directly to your computer over your local WiFi network using WebRTC — no internet or cloud required.
 
 **Q: What devices are supported?**  
 - **Sender (Camera):** Any smartphone with a modern browser (Chrome, Safari, Firefox)
-- **Viewer:** Windows PC running the MCX Cam desktop app, or any browser on the same network
+- **Viewer:** Windows PC running the CamXtract desktop app, or any browser on the same network
 - **OS:** Windows 10/11 (for the `.exe`); the web viewer works on any OS
 
 **Q: Do I need an internet connection?**  
-No. MCX Cam works entirely on your local WiFi network. The only internet access is for STUN server lookups (to establish the peer connection), which are very lightweight.
+No. CamXtract works entirely on your local WiFi network. The only internet access is for STUN server lookups (to establish the peer connection), which are very lightweight.
 
 ---
 
 ## 🔐 SSL & Certificate Issues
 
 **Q: Why does the browser say "Not Private" or "Your connection is not secure"?**  
-MCX Cam generates a self-signed SSL certificate for your local IP address. This is required for camera access on mobile browsers (especially iOS Safari). The warning is expected — click **Advanced → Proceed** (Chrome) or **Show Details → Visit this website** (Safari).
+CamXtract generates a self-signed SSL certificate for your local IP address. This is required for camera access on mobile browsers (especially iOS Safari). The warning is expected — click **Advanced → Proceed** (Chrome) or **Show Details → Visit this website** (Safari).
 
 **Q: How do I regenerate the SSL certificate?**  
 If your computer's IP address changes (e.g., after reconnecting to WiFi):
-1. Delete `key.pem` and `cert.pem` from the folder containing `MCX_Cam.exe`
+1. Delete `key.pem` and `cert.pem` from the folder containing `CamXtract.exe`
 2. Restart the app — fresh certificates are generated automatically
 
 **Q: The camera feed isn't loading on iOS Safari.**  
@@ -57,7 +57,7 @@ Not in v0.0.1. Audio streaming is planned for a future release.
 
 ---
 
-## 🖥️ Desktop App (MCX Cam GUI)
+## 🖥️ Desktop App (CamXtract GUI)
 
 **Q: The app takes a long time to open on first launch.**  
 The first launch extracts the PyInstaller bundle to a temporary folder (one-time process). Subsequent launches are significantly faster. The app also shows a splash screen while panels load.
@@ -69,10 +69,10 @@ The Camera Monitor panel loads the Microsoft Edge WebView2 runtime (`.NET CLR`) 
 This was a known bug in earlier builds (v0.0.1 fixes it). The custom title bar uses a Win32 API call to minimize instead of the standard Tkinter method.
 
 **Q: Where is the configuration saved?**  
-Settings (server name, port, sliders, toggles) are saved to `mcx_config.json` in the same directory as the `.exe`. Delete this file to reset to defaults.
+Settings (server name, port, sliders, toggles) are saved to `camxtract_config.json` in the same directory as the `.exe`. Delete this file to reset to defaults.
 
-**Q: Can I use MCX Cam with OBS Studio?**  
-Yes. Start the MCX Cam server, then add a **Browser Source** in OBS using the OBS URL shown in the Console panel (`https://<IP>:<PORT>/obs.html`).
+**Q: Can I use CamXtract with OBS Studio?**  
+Yes. Start the CamXtract server, then add a **Browser Source** in OBS using the OBS URL shown in the Console panel (`https://<IP>:<PORT>/obs.html`).
 
 ---
 
@@ -100,14 +100,14 @@ This means `cert.pem` and `key.pem` don't exist yet. Start the server at least o
 **Q: How do I build my own `.exe`?**  
 See the [README build instructions](README.md#building-the-standalone-exe). Use the `version_info.txt` for embedded Windows metadata.
 
-**Q: Can I run MCX Cam on macOS or Linux?**  
+**Q: Can I run CamXtract on macOS or Linux?**  
 The `.exe` is Windows-only. Running from source (`python gui.py`) may work on macOS/Linux but the Camera Monitor (Edge WebView2) is Windows-only. Other panels should work cross-platform.
 
 ---
 
 ## 📬 Contact & Support
 
-- **GitHub Issues:** [github.com/prifulnath/MCX_Cam/issues](https://github.com/prifulnath/MCX_Cam/issues)
+- **GitHub Issues:** [github.com/prifulnath/CamXtract/issues](https://github.com/prifulnath/CamXtract/issues)
 - **Email:** prifulnath@gmail.com
 
 ---

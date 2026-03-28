@@ -1,13 +1,16 @@
 import ctypes
 try:
-    ctypes.windll.shcore.SetProcessDpiAwareness(1)
+    _windll = getattr(ctypes, 'windll', None)
+    if _windll:
+        _windll.shcore.SetProcessDpiAwareness(1)
 except Exception:
     pass
 
+import sys
+from typing import Any
 import customtkinter as ctk
 import socket
 import os
-import time
 
 # Colors
 BG_DARK    = "#0e0e0e"
@@ -28,21 +31,21 @@ def get_local_ip():
         s.close()
     return ip
 
-class MCXCamApp(ctk.CTk):
+class CamXtractApp(ctk.CTk):
     def _get_res(self, path):
-        import sys, os
+        """Resolve a resource path for both dev and PyInstaller environments."""
         if hasattr(sys, '_MEIPASS'):
-            return os.path.join(sys._MEIPASS, path)
+            return os.path.join(getattr(sys, '_MEIPASS'), path)
         return os.path.abspath(path)
 
     def __init__(self):
         super().__init__()
-        self.title("MCX CAM")
+        self.title("CamXtract")
         self.geometry("1060x760")
         self.minsize(900, 680)
         self.configure(fg_color=BG_DARK)
 
-        ico_path = self._get_res("app/mcx_logo.ico")
+        ico_path = self._get_res("app/camxtract_logo.ico")
         if os.path.exists(ico_path):
             try:
                 self.iconbitmap(ico_path)
@@ -71,7 +74,7 @@ class MCXCamApp(ctk.CTk):
         center = ctk.CTkFrame(self._splash, fg_color="transparent")
         center.place(relx=0.5, rely=0.5, anchor="center")
 
-        logo_path = self._get_res("app/mcx_logo.png")
+        logo_path = self._get_res("app/camxtract_logo.png")
         if os.path.exists(logo_path):
             import tkinter as tk
             _logo = tk.PhotoImage(file=logo_path)
@@ -82,7 +85,7 @@ class MCXCamApp(ctk.CTk):
             ctk.CTkLabel(center, text="\uE968",
                          font=("Segoe MDL2 Assets", 56), text_color=GREEN).pack(pady=(0, 20))
 
-        ctk.CTkLabel(center, text="MCX CAM",
+        ctk.CTkLabel(center, text="CamXtract",
                      font=("Space Grotesk", 30, "bold"), text_color=GREEN).pack()
         ctk.CTkLabel(center, text="VISUAL INTELLIGENCE CONTROL NODE",
                      font=("Space Grotesk", 10, "bold"), text_color=TEXT_DIM).pack(pady=(4, 28))
@@ -115,10 +118,12 @@ class MCXCamApp(ctk.CTk):
             GWL_EXSTYLE     = -20
             WS_EX_APPWINDOW = 0x00040000
             WS_EX_TOOLWINDOW= 0x00000080
-            hwnd  = ctypes.windll.user32.GetParent(self.winfo_id())
-            style = ctypes.windll.user32.GetWindowLongW(hwnd, GWL_EXSTYLE)
-            style = style & ~WS_EX_TOOLWINDOW | WS_EX_APPWINDOW
-            ctypes.windll.user32.SetWindowLongW(hwnd, GWL_EXSTYLE, style)
+            _windll = getattr(ctypes, 'windll', None)
+            if _windll:
+                hwnd  = _windll.user32.GetParent(self.winfo_id())
+                style = _windll.user32.GetWindowLongW(hwnd, GWL_EXSTYLE)
+                style = style & ~WS_EX_TOOLWINDOW | WS_EX_APPWINDOW
+                _windll.user32.SetWindowLongW(hwnd, GWL_EXSTYLE, style)
             self.wm_withdraw()
             self.wm_deiconify()
         except Exception:
@@ -134,14 +139,15 @@ class MCXCamApp(ctk.CTk):
 
         self.frames = {}      # instantiated frames
         self._frame_defs = {  # lazy definitions (module, class)
-            "Console":         ("ui.ui_console",         "ConsoleFrame"),
-            "Server Settings": ("ui.ui_server_settings", "ServerSettingsFrame"),
-            "Network Info":    ("ui.ui_network_info",    "NetworkInfoFrame"),
-            "Security Log":    ("ui.ui_security_log",    "SecurityLogFrame"),
-            "Vault":           ("ui.ui_vault",           "VaultFrame"),
-            "Support":         ("ui.ui_support",         "SupportFrame"),
+            "Console":          ("ui.ui_console",           "ConsoleFrame"),
+            "Server Settings":  ("ui.ui_server_settings",   "ServerSettingsFrame"),
+            "Camera Controls":  ("ui.ui_camera_controls",   "CameraControlsFrame"),
+            "Network Info":     ("ui.ui_network_info",       "NetworkInfoFrame"),
+            "Security Log":     ("ui.ui_security_log",       "SecurityLogFrame"),
+            "Vault":            ("ui.ui_vault",              "VaultFrame"),
+            "Support":          ("ui.ui_support",            "SupportFrame"),
             # Camera Monitor last — heaviest (loads .NET CLR via tkwebview2)
-            "Camera Monitor":  ("ui.ui_camera_monitor",  "CameraMonitorFrame"),
+            "Camera Monitor":   ("ui.ui_camera_monitor",     "CameraMonitorFrame"),
         }
 
         # Build sidebar (lightweight)
@@ -193,14 +199,15 @@ class MCXCamApp(ctk.CTk):
 
         con = self.frames.get("Console")
         if con:
-            con.log("INFO", "MCX Cam Control Node initialized.")
+            con.log("INFO", "CamXtract Control Node initialized.")
             con.log("INFO", f"Local IP detected: {self.ip}")
             con.log("INFO", "Click 'START SERVER' to launch the streaming service.")
 
-        auto_start = (self.frames.get("Server Settings") and
-                      self.frames["Server Settings"].ui_elements.get("Auto-start Engine"))
+        ss = self.frames.get("Server Settings")
+        auto_start = ss.ui_elements.get("Auto-start Engine") if ss else None
         if auto_start and str(auto_start.get()) in ("1", "True", "true"):
-            con and con.log("INFO", "Auto-start enabled. Launching server...")
+            if con:
+                con.log("INFO", "Auto-start enabled. Launching server...")
             self.after(500, lambda: self.frames["Console"].start_server())
 
         # Remove splash and show Console
@@ -221,7 +228,7 @@ class MCXCamApp(ctk.CTk):
         self.frames["Server Settings"].save_config()
         new_name = self.frames["Server Settings"].server_name_entry.get().strip().upper()
         if not new_name:
-            new_name = "MCX-01"
+            new_name = "CamXtract-01"
         self.node_badge_label.configure(text=new_name)
         if not initial:
             self.frames["Console"].log("SUCCESS",
@@ -263,7 +270,8 @@ class MCXCamApp(ctk.CTk):
         self.title_bar = ctk.CTkFrame(self, fg_color="#0e0e0e", height=48, corner_radius=0)
         self.title_bar.grid(row=0, column=0, columnspan=2, sticky="ew")
         self.title_bar.grid_propagate(False)
-        self.title_bar.grid_columnconfigure(1, weight=1)
+        self.title_bar.grid_columnconfigure(1, weight=1)  # spacer column stretches
+        self.title_bar.grid_columnconfigure(2, weight=0)  # window controls — fixed width
 
         branding = ctk.CTkFrame(self.title_bar, fg_color="transparent")
         branding.grid(row=0, column=0, padx=24, pady=10, sticky="w")
@@ -273,7 +281,7 @@ class MCXCamApp(ctk.CTk):
         icon_box.pack_propagate(False)
         icon_box.pack(side="left", padx=(0, 10))
 
-        logo_path = self._get_res("app/mcx_logo.png")
+        logo_path = self._get_res("app/camxtract_logo.png")
         if os.path.exists(logo_path):
             import tkinter as tk
             self.title_logo = tk.PhotoImage(file=logo_path)
@@ -282,7 +290,7 @@ class MCXCamApp(ctk.CTk):
             ctk.CTkLabel(icon_box, text="\uE968",
                          font=("Segoe MDL2 Assets", 14), text_color=GREEN).pack()
 
-        title_lbl = ctk.CTkLabel(branding, text="MCX CAM",
+        title_lbl = ctk.CTkLabel(branding, text="CamXtract",
                                   font=("Space Grotesk", 18, "bold"), text_color=GREEN)
         title_lbl.pack(side="left")
 
@@ -291,14 +299,16 @@ class MCXCamApp(ctk.CTk):
 
         def minimize():
             # iconify() doesn't work with overrideredirect — use Win32 directly
-            hwnd = ctypes.windll.user32.GetParent(self.winfo_id())
-            ctypes.windll.user32.ShowWindow(hwnd, 6)  # SW_MINIMIZE
+            _windll = getattr(ctypes, 'windll', None)
+            if _windll:
+                hwnd = _windll.user32.GetParent(self.winfo_id())
+                _windll.user32.ShowWindow(hwnd, 6)  # SW_MINIMIZE
         def maximize():
             self.state("normal") if self.state() == "zoomed" else self.state("zoomed")
         def close():     self.on_closing()
 
-        btn_style = dict(font=("Segoe MDL2 Assets", 10), width=46, height=48,
-                         fg_color="transparent", text_color="#cccccc", corner_radius=0)
+        btn_style: dict[str, Any] = dict(font=("Segoe MDL2 Assets", 10), width=46, height=48,
+                                          fg_color="transparent", text_color="#cccccc", corner_radius=0)
         ctk.CTkButton(controls, text="\uE921", hover_color="#2a2a2a",
                       command=minimize, **btn_style).pack(side="left")
         ctk.CTkButton(controls, text="\uE922", hover_color="#2a2a2a",
@@ -326,6 +336,6 @@ class MCXCamApp(ctk.CTk):
         os._exit(0)
 
 if __name__ == "__main__":
-    app = MCXCamApp()
+    app = CamXtractApp()
     app.protocol("WM_DELETE_WINDOW", app.on_closing)
     app.mainloop()

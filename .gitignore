@@ -21,7 +21,7 @@ build/
 dist/
 
 # User Config (machine-specific)
-mcx_config.json
+camxtract_config.json
 
 # OS / Editor Artifacts
 .DS_Store
