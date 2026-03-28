@@ -411,7 +411,7 @@ class CameraControlsFrame(ctk.CTkFrame):
             else:
                 self.after(0, lambda: self._set_status(f"⚠ Save failed: {r.status_code}"))
         except Exception as e:
-            self.after(0, lambda: self._set_status(f"⚠ {e}"))
+            self.after(0, lambda e=e: self._set_status(f"⚠ {e}"))
 
     def _load_profile(self):
         if not _REQUESTS_OK:
@@ -429,7 +429,7 @@ class CameraControlsFrame(ctk.CTkFrame):
             else:
                 self.after(0, lambda: self._set_status(f"⚠ Load failed: {r.status_code}"))
         except Exception as e:
-            self.after(0, lambda: self._set_status(f"⚠ {e}"))
+            self.after(0, lambda e=e: self._set_status(f"⚠ {e}"))
 
     def _populate(self, cfg: dict):
         # Resolution
@@ -479,7 +479,7 @@ class CameraControlsFrame(ctk.CTkFrame):
             else:
                 self.after(0, lambda: self._set_status(f"⚠ Reset failed: {r.status_code}"))
         except Exception as e:
-            self.after(0, lambda: self._set_status(f"⚠ {e}"))
+            self.after(0, lambda e=e: self._set_status(f"⚠ {e}"))
 
     def _fetch_config(self):
         """Load config on panel first open."""
